@@ -39,16 +39,30 @@ def init_db():
             )
         ''')
 
-        # Questions Table
+        # Tests/Exams Table (New)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT,
+                description TEXT,
+                scheduled_date DATE,
+                duration_minutes INTEGER DEFAULT 60,
+                is_active BOOLEAN DEFAULT 1
+            )
+        ''')
+
+        # Questions Table (Updated with test_id)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS questions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                test_id INTEGER,
                 text TEXT,
                 type TEXT, 
                 options TEXT,
                 correct_answer TEXT,
                 category TEXT,
-                difficulty TEXT
+                difficulty TEXT,
+                FOREIGN KEY (test_id) REFERENCES tests(id)
             )
         ''')
 
@@ -57,11 +71,13 @@ def init_db():
             CREATE TABLE IF NOT EXISTS results (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER,
+                test_id INTEGER,
                 question_id INTEGER,
                 user_answer TEXT,
                 is_correct BOOLEAN,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (test_id) REFERENCES tests(id),
                 FOREIGN KEY (question_id) REFERENCES questions(id)
             )
         ''')
@@ -151,12 +167,42 @@ def me():
         "role": session.get('role')
     })
 
-# API: Get Questions (Student)
-@app.route('/api/questions', methods=['GET'])
+# API: Get List of Tests
+@app.route('/api/tests', methods=['GET'])
 @login_required
-def get_questions():
+def get_tests():
     db = get_db()
-    questions = db.execute("SELECT id, text, type, options, category, difficulty FROM questions").fetchall()
+    user_id = session['user_id']
+    
+    # Get all tests
+    tests = db.execute("SELECT * FROM tests ORDER BY scheduled_date ASC").fetchall()
+    
+    result = []
+    for t in tests:
+        t_dict = dict(t)
+        # Check if user has attempted this test
+        # We define "attempted" as having at least one result record for this test_id
+        attempt = db.execute("SELECT COUNT(*) as count FROM results WHERE user_id = ? AND test_id = ?", (user_id, t['id'])).fetchone()
+        t_dict['is_completed'] = attempt['count'] > 0
+        
+        # Calculate scores if completed
+        if t_dict['is_completed']:
+            score_data = db.execute("SELECT COUNT(*) as total, SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as score FROM results WHERE user_id = ? AND test_id = ?", (user_id, t['id'])).fetchone()
+             # Convert None to 0 for score
+            correct_count = score_data['score'] if score_data['score'] is not None else 0
+            t_dict['score'] = correct_count
+            t_dict['total_questions'] = score_data['total']
+            
+        result.append(t_dict)
+        
+    return jsonify(result)
+
+# API: Get Questions for a Specific Test
+@app.route('/api/tests/<int:test_id>/questions', methods=['GET'])
+@login_required
+def get_test_questions(test_id):
+    db = get_db()
+    questions = db.execute("SELECT id, text, type, options, category, difficulty FROM questions WHERE test_id = ?", (test_id,)).fetchall()
     
     processed = []
     for q in questions:
@@ -170,74 +216,39 @@ def get_questions():
         
     return jsonify(processed)
 
-# API: Submit Answer
-@app.route('/api/submit', methods=['POST'])
+# API: Get Stats for Specific Test (Solution View)
+@app.route('/api/tests/<int:test_id>/stats', methods=['GET'])
 @login_required
-def submit_answer():
-    data = request.json
-    question_id = data.get('questionId')
-    answer = data.get('answer')
-    user_id = session['user_id']
-
-    db = get_db()
-    question = db.execute("SELECT correct_answer FROM questions WHERE id = ?", (question_id,)).fetchone()
-    
-    if not question:
-        return jsonify({"error": "Question not found"}), 404
-
-    is_correct = (question['correct_answer'] == answer)
-    
-    db.execute("INSERT INTO results (user_id, question_id, user_answer, is_correct) VALUES (?, ?, ?, ?)",
-               (user_id, question_id, answer, is_correct))
-    db.commit()
-
-    return jsonify({"success": True, "isCorrect": is_correct, "correctAnswer": question['correct_answer']})
-
-# API: User Stats (Detailed Solutions)
-@app.route('/api/stats', methods=['GET'])
-@login_required
-def get_stats():
+def get_test_stats(test_id):
     user_id = session['user_id']
     db = get_db()
     
     # 1. Basic Counts
-    total = db.execute("SELECT COUNT(*) as count FROM results WHERE user_id = ?", (user_id,)).fetchone()['count']
-    score = db.execute("SELECT COUNT(*) as count FROM results WHERE user_id = ? AND is_correct = 1", (user_id,)).fetchone()['count']
+    total = db.execute("SELECT COUNT(*) as count FROM results WHERE user_id = ? AND test_id = ?", (user_id, test_id)).fetchone()['count']
+    score = db.execute("SELECT COUNT(*) as count FROM results WHERE user_id = ? AND test_id = ? AND is_correct = 1", (user_id, test_id)).fetchone()['count']
     
-    # 2. Full History (All Questions + Latest Attempt)
-    # This query fetches ALL questions and joins with the student's LATEST attempt for each.
+    # 2. History
     query = '''
         SELECT q.id, q.text as question_text, q.correct_answer, 
                r.user_answer, r.is_correct, r.timestamp
         FROM questions q
-        LEFT JOIN (
-            SELECT r1.*
-            FROM results r1
-            INNER JOIN (
-                SELECT question_id, MAX(id) as max_id
-                FROM results
-                WHERE user_id = ?
-                GROUP BY question_id
-            ) r2 ON r1.id = r2.max_id
-        ) r ON q.id = r.question_id
+        LEFT JOIN results r ON q.id = r.question_id AND r.user_id = ?
+        WHERE q.test_id = ?
         ORDER BY q.id ASC
     '''
     
-    detailed_rows = db.execute(query, (user_id,)).fetchall()
+    detailed_rows = db.execute(query, (user_id, test_id)).fetchall()
     
-    # Process rows
     history = []
     for row in detailed_rows:
         r_dict = dict(row)
-        # Handle Unanswered
         if r_dict['user_answer'] is None:
              r_dict['user_answer'] = "Not Attempted"
              r_dict['is_correct'] = False
              r_dict['status'] = 'skipped'
         else:
             r_dict['status'] = 'answered'
-            r_dict['is_correct'] = bool(r_dict['is_correct']) # Ensure boolean
-            
+            r_dict['is_correct'] = bool(r_dict['is_correct'])
         history.append(r_dict)
     
     return jsonify({
@@ -246,23 +257,53 @@ def get_stats():
         "history": history
     })
 
-# API: Admin Stats
-@app.route('/api/admin/stats', methods=['GET'])
+# API: Admin Create Test
+@app.route('/api/admin/tests', methods=['POST'])
 @admin_required
-def admin_stats():
+def create_test():
+    data = request.json
     db = get_db()
-    users = db.execute("SELECT id, username, role FROM users WHERE role != 'admin'").fetchall()
+    db.execute("INSERT INTO tests (title, description, scheduled_date, duration_minutes) VALUES (?, ?, ?, ?)",
+               (data.get('title'), data.get('description'), data.get('date'), data.get('duration', 60)))
+    db.commit()
+    return jsonify({"success": True})
+
+# API: Submit Answer
+@app.route('/api/submit', methods=['POST'])
+@login_required
+def submit_answer():
+    data = request.json
+    question_id = data.get('questionId')
+    answer = data.get('answer')
+    user_id = session['user_id']
+    test_id = data.get('testId') # Optionally passed from frontend
+
+    db = get_db()
+    question = db.execute("SELECT correct_answer, test_id FROM questions WHERE id = ?", (question_id,)).fetchone()
     
-    stats = []
-    for user in users:
-        res = db.execute("SELECT COUNT(*) as total, SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as score FROM results WHERE user_id = ?", (user['id'],)).fetchone()
-        stats.append({
-            "username": user['username'],
-            "totalAnswered": res['total'],
-            "score": res['score'] if res['score'] else 0
-        })
+    if not question:
+        return jsonify({"error": "Question not found"}), 404
         
-    return jsonify(stats)
+    # If test_id not passed, use the one from question
+    if not test_id:
+        test_id = question['test_id']
+
+    is_correct = (question['correct_answer'] == answer)
+    
+    # Check if result already exists (update it)
+    existing = db.execute("SELECT id FROM results WHERE user_id = ? AND question_id = ?", (user_id, question_id)).fetchone()
+    
+    if existing:
+        db.execute("UPDATE results SET user_answer = ?, is_correct = ?, timestamp = CURRENT_TIMESTAMP WHERE id = ?", 
+                   (answer, is_correct, existing['id']))
+    else:
+        db.execute("INSERT INTO results (user_id, test_id, question_id, user_answer, is_correct) VALUES (?, ?, ?, ?, ?)",
+                   (user_id, test_id, question_id, answer, is_correct))
+    db.commit()
+
+    return jsonify({"success": True, "isCorrect": is_correct, "correctAnswer": question['correct_answer']})
+
+# ... (Existing stats API removed/updated safely above) ...
 
 # API: Add Question (Admin)
 @app.route('/api/admin/questions', methods=['POST'])
@@ -275,13 +316,14 @@ def add_question():
     correct = data.get('correct_answer')
     category = data.get('category', 'General')
     difficulty = data.get('difficulty', 'Medium')
+    test_id = data.get('test_id')
 
-    if not text or not correct:
-        return jsonify({"error": "Missing required fields"}), 400
+    if not text or not correct or not test_id:
+        return jsonify({"error": "Missing fields (text, correct_answer, test_id)"}), 400
 
     db = get_db()
-    db.execute("INSERT INTO questions (text, type, options, correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?)",
-               (text, q_type, json.dumps(options), correct, category, difficulty))
+    db.execute("INSERT INTO questions (test_id, text, type, options, correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)",
+               (test_id, text, q_type, json.dumps(options), correct, category, difficulty))
     db.commit()
     
     return jsonify({"success": True})
