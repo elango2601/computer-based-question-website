@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - StudentQA</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .quiz-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+            align-items: start;
+        }
+
+        .quiz-container {
+            width: 100%;
+            margin: 0;
+            max-width: none;
+        }
+
+        .palette-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            position: sticky;
+            top: 100px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .palette-item {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .palette-item:hover {
+            border-color: var(--primary);
+        }
+
+        .palette-item.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .palette-item.answered {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .feedback.saved {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        /* Fullscreen Overlay Styles */
+        #start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--background);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+        }
+
+        #timer-display {
+            position: fixed;
+            top: 1rem;
+            right: 2rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: white;
+            z-index: 100;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 900px) {
+            .quiz-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .palette-card {
+                order: -1;
+                position: static;
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Start Overlay -->
+    <div id="start-overlay" class="animate-fade-in">
+        <h1 class="mb-8">SECURE EXAM ENVIRONMENT</h1>
+        <div class="card" style="max-width: 500px">
+            <h3 class="mb-4">Instructions</h3>
+            <ul style="text-align: left; list-style: none; margin-bottom: 2rem;">
+                <li class="mb-4">🔒 <strong>Fullscreen Mode:</strong> The exam initiates safely in fullscreen.</li>
+                <li class="mb-4">🚫 <strong>No Tab Switching:</strong> Moving to another tab is recorded as malpractice.
+                </li>
+                <li class="mb-4">⏱️ <strong>Timer:</strong> You have 60 Minutes to complete the exam.</li>
+                <li>📝 <strong>Navigation:</strong> Use the question palette to jump between questions.</li>
+            </ul>
+            <button class="btn btn-primary w-full" onclick="startExam()">Tick to Confirm & Start Exam</button>
+        </div>
+    </div>
+
+    <!-- Timer (Hidden initially) -->
+    <div id="timer-display" class="hidden">60:00</div>
+
+    <nav style="visibility: hidden;" id="main-nav">
+        <div class="logo">Student<span>QA</span></div>
+        <div class="nav-links">
+            <span style="color: var(--error); font-weight: bold;">EXAM IN PROGRESS</span>
+        </div>
+    </nav>
+
+    <div class="quiz-layout hidden" id="main-quiz-container">
+        <!-- Question Area -->
+        <div class="container quiz-container animate-fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="q-category">Category</h2>
+                <span id="q-progress">Question 1/X</span>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="card">
+                <div id="loading" class="text-center p-8">Loading Questions...</div>
+
+                <div id="quiz-content" class="hidden">
+                    <span class="badge"
+                        style="background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; margin-bottom: 1rem; display: inline-block;"
+                        id="q-difficulty">Difficulty</span>
+                    <h2 id="q-text" class="mb-8" style="font-size: 1.5rem;">Question Text?</h2>
+
+                    <div id="options-container">
+                        <!-- Options injected here -->
+                    </div>
+
+                    <div class="input-group hidden" id="text-answer-container">
+                        <textarea id="text-answer" rows="3" placeholder="Type your answer here..."></textarea>
+                    </div>
+
+                    <!-- Hidden Feedback Area (Exam Mode) -->
+                    <div id="feedback-area" class="hidden feedback"></div>
+
+                    <div class="mt-4 flex justify-between items-center">
+                        <div>
+                            <!-- Spacer or Prev Button -->
+                        </div>
+                        <button id="submit-btn" class="btn btn-primary" onclick="submitAnswer()">Save Answer</button>
+                    </div>
+                </div>
+
+                <div id="quiz-end" class="hidden text-center">
+                    <h2>Exam Submitted!</h2>
+                    <p class="mb-8 text-muted">Your answers have been securely recorded.</p>
+                    <div class="flex justify-center gap-4">
+                        <button onclick="finishExam()" class="btn btn-primary">View Results & Solutions</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Palette Area -->
+        <div class="palette-card animate-fade-in">
+            <h3 class="mb-4">Question Palette</h3>
+            <div class="flex justify-between text-sm text-muted mb-4">
+                <span class="flex items-center gap-2"><span
+                        style="width:10px; height:10px; background:var(--success); border-radius:50%;"></span>
+                    Answered</span>
+                <span class="flex items-center gap-2"><span
+                        style="width:10px; height:10px; background:rgba(255,255,255,0.1); border-radius:50%;"></span>
+                    Pending</span>
+            </div>
+            <div class="palette-grid" id="palette-grid">
+                <!-- Grid Items -->
+            </div>
+            <button onclick="manualSubmit()" class="btn btn-secondary w-full mt-8"
+                style="border-color: var(--error); color: var(--error);">Submit Exam</button>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        checkAuth('student');
+
+        let questions = [];
+        let currentIndex = 0;
+        let selectedOption = null;
+        let timeLeft = 60 * 60;
+        let timerInterval;
+        let malpracticeCount = 0;
+        let answeredQuestions = new Set(); // Track answered IDs
+
+        // Security
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        function startExam() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) elem.requestFullscreen().catch(err => console.log(err));
+
+            document.getElementById('start-overlay').classList.add('hidden');
+            document.getElementById('main-nav').style.visibility = 'visible';
+            document.getElementById('main-quiz-container').classList.remove('hidden');
+            document.getElementById('timer-display').classList.remove('hidden');
+
+            initQuiz();
+            startTimer();
+            enableSecurityListeners();
+        }
+
+        function enableSecurityListeners() {
+            // 1. Prevent Tab Switching
+            document.addEventListener("visibilitychange", () => {
+                if (document.hidden) {
+                    malpracticeCount++;
+                    showToast(`WARNING: Tab switch detected! (${malpracticeCount}/3)`, 'error');
+                    if (malpracticeCount >= 3) forceSubmit("Malpractice limit exceeded.");
+                }
+            });
+
+            // 2. Prevent Copy/Paste
+            document.body.oncopy = () => false;
+            document.body.oncut = () => false;
+            document.body.onpaste = () => false;
+
+            // 3. Prevent Back Button (Mobile/Desktop)
+            history.pushState(null, null, location.href);
+            window.onpopstate = function () {
+                history.go(1);
+                showToast("⚠️ Back button is disabled during the exam!", "error");
+            };
+
+            // 4. Prevent Refresh/Close Tab
+            window.onbeforeunload = function () {
+                return "Are you sure you want to leave? Your exam progress will be lost.";
+            };
+        }
+
+        function startTimer() {
+            const timerEl = document.getElementById('timer-display');
+            timerInterval = setInterval(() => {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+                minutes = minutes < 10 ? '0' + minutes : minutes;
+                timerEl.innerText = `${minutes}:${seconds}`;
+                if (timeLeft < 300) timerEl.classList.add('timer-warning');
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    forceSubmit("Time's up!");
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        function manualSubmit() {
+            if (confirm("Are you sure you want to submit the exam? You cannot change answers after submitting.")) {
+                forceSubmit("Manual Submission.");
+            }
+        }
+
+        function forceSubmit(reason) {
+            clearInterval(timerInterval);
+            // Remove navigation warning so we can leave the page cleanly later
+            window.onbeforeunload = null;
+
+            document.getElementById('main-quiz-container').classList.add('hidden'); // Hide entire layout
+
+            // Show end screen in simple container
+            const endContainer = document.createElement('div');
+            endContainer.className = 'container animate-fade-in text-center';
+            endContainer.style.marginTop = '4rem';
+            endContainer.innerHTML = `
+                <div class="card">
+                    <h2>Exam Submitted</h2>
+                    <p class="text-muted mb-4">${reason}</p>
+                    <button onclick="finishExam()" class="btn btn-primary">Return to Dashboard</button>
+                </div>
+            `;
+            document.body.appendChild(endContainer);
+
+            if (document.fullscreenElement) document.exitFullscreen().catch(e => { });
+        }
+
+        function finishExam() {
+            window.location.href = 'dashboard.html';
+        }
+
+        async function initQuiz() {
+            const { status, data } = await apiCall('/questions');
+            if (status === 200) {
+                if (data.length === 0) {
+                    document.getElementById('loading').innerText = "No questions available.";
+                    return;
+                }
+                questions = data;
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('quiz-content').classList.remove('hidden');
+                renderPalette();
+                renderQuestion();
+            } else {
+                document.getElementById('loading').innerText = "Failed to load questions.";
+            }
+        }
+
+        function renderPalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = '';
+            questions.forEach((q, idx) => {
+                const item = document.createElement('div');
+                item.className = 'palette-item';
+                item.innerText = idx + 1;
+                item.id = `palette-${idx}`;
+                item.onclick = () => jumpToQuestion(idx);
+                grid.appendChild(item);
+            });
+        }
+
+        function jumpToQuestion(idx) {
+            currentIndex = idx;
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            // Update Palette Active State
+            document.querySelectorAll('.palette-item').forEach(el => el.classList.remove('active'));
+            const currentPalette = document.getElementById(`palette-${currentIndex}`);
+            if (currentPalette) currentPalette.classList.add('active');
+
+            // Scroll palette to view
+            if (currentPalette) currentPalette.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            const q = questions[currentIndex];
+            document.getElementById('q-category').innerText = q.category || 'General';
+            document.getElementById('q-progress').innerText = `Question ${currentIndex + 1}/${questions.length}`;
+            document.getElementById('q-difficulty').innerText = q.difficulty || 'Normal';
+            document.getElementById('q-text').innerText = q.text;
+
+            const percent = ((currentIndex + 1) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            document.getElementById('text-answer-container').classList.add('hidden');
+            selectedOption = null;
+            document.getElementById('feedback-area').classList.add('hidden');
+
+            // Check if already answered
+            const isAnswered = answeredQuestions.has(q.id);
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (isAnswered) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Saved";
+                submitBtn.style.opacity = "0.5";
+
+                // Show a "Saved" feedback
+                const feedback = document.getElementById('feedback-area');
+                feedback.innerHTML = "Answer Saved";
+                feedback.className = "feedback saved";
+                feedback.classList.remove('hidden');
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Save Answer";
+                submitBtn.style.opacity = "1";
+            }
+
+            if (q.type === 'mcq' && q.options) {
+                q.options.forEach(opt => {
+                    const btn = document.createElement('div');
+                    btn.className = 'option-btn';
+                    btn.innerText = opt;
+                    if (!isAnswered) {
+                        btn.onclick = () => selectOption(btn, opt);
+                    } else {
+                        btn.style.cursor = 'default';
+                        // Ideally we would show what they selected, but we don't store it locally right now easily without fetching stats. 
+                        // For this simple version, we just lock it.
+                    }
+                    container.appendChild(btn);
+                });
+            } else {
+                document.getElementById('text-answer-container').classList.remove('hidden');
+                document.getElementById('text-answer').value = '';
+                if (isAnswered) document.getElementById('text-answer').disabled = true;
+                else document.getElementById('text-answer').disabled = false;
+            }
+        }
+
+        function selectOption(el, val) {
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedOption = val;
+        }
+
+        async function submitAnswer() {
+            const q = questions[currentIndex];
+            let answer = selectedOption;
+
+            if (q.type !== 'mcq') {
+                answer = document.getElementById('text-answer').value.trim();
+            }
+
+            if (!answer) {
+                showToast('Please select or type an answer', 'error');
+                return;
+            }
+
+            // Disable UI
+            document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'none');
+            document.getElementById('text-answer').disabled = true;
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('submit-btn').innerText = "Saving...";
+
+            // Send to API
+            const res = await apiCall('/submit', 'POST', {
+                questionId: q.id,
+                answer: answer
+            });
+
+            if (res.status === 200) {
+                // Mark locally
+                answeredQuestions.add(q.id);
+                document.getElementById(`palette-${currentIndex}`).classList.add('answered');
+
+                // Show subtle feedback
+                const feedback = document.getElementById('feedback-area');
+                feedback.innerHTML = "Answer Saved Successfully";
+                feedback.className = "feedback saved";
+                feedback.classList.remove('hidden');
+
+                document.getElementById('submit-btn').innerText = "Saved";
+
+                // Auto advance after 1s
+                setTimeout(() => {
+                    if (currentIndex < questions.length - 1) {
+                        jumpToQuestion(currentIndex + 1);
+                    }
+                }, 800);
+            } else {
+                showToast("Failed to save answer. Try again.", "error");
+                document.getElementById('submit-btn').disabled = false;
+                document.getElementById('submit-btn').innerText = "Save Answer";
+            }
+        }
+    </script>
+</body>
+
+</html>

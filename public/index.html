@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - StudentQA</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container flex flex-col items-center justify-center" style="min-height: 100vh;">
+        <div class="header text-center mb-8 animate-fade-in">
+            <h1>Student<span>QA</span></h1>
+            <p style="color: var(--text-muted);">Your premium assessment platform.</p>
+        </div>
+
+        <div id="auth-container" class="card w-full animate-fade-in" style="animation-delay: 0.1s;">
+            <!-- Simple Tab Switch -->
+            <div class="flex mb-8 border-b" style="border-color: var(--border);">
+                <button id="tab-login" class="btn btn-secondary w-full" style="border: none; border-bottom: 2px solid var(--primary); border-radius: 0;">Login</button>
+                <button id="tab-register" class="btn btn-secondary w-full" style="border: none; border-bottom: 2px solid transparent; border-radius: 0; opacity: 0.5;">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" name="username" required placeholder="Enter your username">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" name="password" required placeholder="Enter your password">
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Sign In</button>
+            </form>
+
+            <!-- Register Form (Hidden) -->
+            <form id="register-form" class="hidden">
+                <div class="input-group">
+                    <label>Choose Username</label>
+                    <input type="text" name="username" required placeholder="Choose a username">
+                </div>
+                <div class="input-group">
+                    <label>Choose Password</label>
+                    <input type="password" name="password" required placeholder="Choose a password">
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Check if already logged in
+        apiCall('/me').then(({ status, data }) => {
+            if (status === 200) {
+                window.location.href = data.role === 'admin' ? 'admin.html' : 'dashboard.html';
+            }
+        });
+
+        const loginTab = document.getElementById('tab-login');
+        const registerTab = document.getElementById('tab-register');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+
+        loginTab.onclick = () => {
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            loginTab.style.borderBottomColor = 'var(--primary)';
+            loginTab.style.opacity = '1';
+            registerTab.style.borderBottomColor = 'transparent';
+            registerTab.style.opacity = '0.5';
+        };
+
+        registerTab.onclick = () => {
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+            registerTab.style.borderBottomColor = 'var(--primary)';
+            registerTab.style.opacity = '1';
+            loginTab.style.borderBottomColor = 'transparent';
+            loginTab.style.opacity = '0.5';
+        };
+
+        loginForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(loginForm);
+            const body = Object.fromEntries(formData);
+            
+            const res = await apiCall('/login', 'POST', body);
+            if (res.status === 200) {
+                showToast('Login successful', 'success');
+                setTimeout(() => {
+                    window.location.href = res.data.role === 'admin' ? 'admin.html' : 'dashboard.html';
+                }, 500);
+            } else {
+                showToast(res.data.error || 'Login failed', 'error');
+            }
+        };
+
+        registerForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(registerForm);
+            const body = Object.fromEntries(formData);
+            
+            const res = await apiCall('/register', 'POST', body);
+            if (res.status === 200) {
+                showToast('Registration successful! Please login.', 'success');
+                loginTab.click();
+            } else {
+                showToast(res.data.error || 'Registration failed', 'error');
+            }
+        };
+    </script>
+</body>
+</html>

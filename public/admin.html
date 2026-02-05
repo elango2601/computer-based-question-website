@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - StudentQA</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo">Student<span>QA</span> <span class="badge"
+                style="background:var(--secondary); font-size: 0.7rem; padding: 2px 8px; border-radius: 4px;">ADMIN</span>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="active">Student Performance</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container animate-fade-in">
+        <div class="flex justify-between items-center mb-8">
+            <h2>Student Performance</h2>
+            <div class="flex gap-4">
+                <button onclick="exportCSV()" class="btn btn-primary">Export to Excel (CSV)</button>
+                <button onclick="exportSQL()" class="btn btn-secondary">Export SQL</button>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <table id="admin-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Total Questions</th>
+                        <th>Score (Correct)</th>
+                        <th>Performance</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-body">
+                    <!-- Loaded dynamically -->
+                </tbody>
+            </table>
+            <div id="loading" class="text-center p-4">Loading Data...</div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        checkAuth('admin');
+        let studentData = [];
+
+        async function loadData() {
+            const { status, data } = await apiCall('/admin/stats');
+            if (status === 200) {
+                studentData = data;
+                document.getElementById('loading').classList.add('hidden');
+                const tbody = document.getElementById('admin-body');
+                tbody.innerHTML = '';
+
+                data.forEach(user => {
+                    const percent = user.totalAnswered > 0 ? Math.round((user.score / user.totalAnswered) * 100) : 0;
+                    let color = 'var(--text-muted)';
+                    if (user.totalAnswered > 0) {
+                        if (percent >= 80) color = 'var(--success)';
+                        else if (percent >= 50) color = 'var(--primary)';
+                        else color = 'var(--error)';
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight: 500; color: white;">${user.username}</td>
+                        <td>${user.totalAnswered}</td>
+                        <td>${user.score}</td>
+                        <td style="color: ${color}; font-weight: 700;">${percent}%</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        function exportCSV() {
+            if (!studentData.length) return showToast('No data to export', 'error');
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Username,Total Questions,Correct Answers,Performance (%)\n";
+
+            studentData.forEach(row => {
+                const percent = row.totalAnswered > 0 ? Math.round((row.score / row.totalAnswered) * 100) : 0;
+                csvContent += `${row.username},${row.totalAnswered},${row.score},${percent}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "student_performance.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportSQL() {
+            if (!studentData.length) return showToast('No data to export', 'error');
+
+            let sqlContent = "CREATE TABLE IF NOT EXISTS student_marks (username TEXT, total INT, score INT, percentage INT);\n";
+            sqlContent += "INSERT INTO student_marks VALUES \n";
+
+            const values = studentData.map(row => {
+                const percent = row.totalAnswered > 0 ? Math.round((row.score / row.totalAnswered) * 100) : 0;
+                return `('${row.username}', ${row.totalAnswered}, ${row.score}, ${percent})`;
+            }).join(",\n");
+
+            sqlContent += values + ";";
+
+            const blob = new Blob([sqlContent], { type: 'text/sql' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "student_marks_export.sql";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        loadData();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - StudentQA</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo">Student<span>QA</span></div>
+        <div class="nav-links">
+            <span id="user-display">User</span>
+            <a href="#" class="active">Dashboard</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container animate-fade-in">
+        <h2 class="mb-8">Your Progress</h2>
+
+        <div class="stats-grid">
+            <div class="card stat-card">
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">Questions Answered</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-value" id="stat-score">0</div>
+                <div class="stat-label">Correct Answers</div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-value" id="stat-accuracy">0%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center mb-8">
+            <h2>Recent Activity</h2>
+            <div class="flex gap-4">
+                <a href="solution.html" class="btn btn-secondary">View Detailed Solutions</a>
+                <a href="quiz.html" class="btn btn-primary">Start New Quiz</a>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <table id="history-table">
+                <thead>
+                    <tr>
+                        <th>Question</th>
+                        <th>Your Answer</th>
+                        <th>Correct Answer</th>
+                        <th>Result</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                    <!-- Loaded dynamically -->
+                </tbody>
+            </table>
+            <div id="no-data" class="text-center p-4 text-muted hidden">No activity yet. Start a quiz!</div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        checkAuth('student');
+
+        async function loadStats() {
+            const { status, data } = await apiCall('/stats');
+            if (status === 200) {
+                document.getElementById('stat-total').innerText = data.total;
+                document.getElementById('stat-score').innerText = data.score;
+                const accuracy = data.total > 0 ? Math.round((data.score / data.total) * 100) : 0;
+                document.getElementById('stat-accuracy').innerHTML = `${accuracy}<span style="font-size: 1rem">%</span>`;
+
+                const tbody = document.getElementById('history-body');
+                tbody.innerHTML = '';
+
+                if (data.history.length === 0) {
+                    document.getElementById('no-data').classList.remove('hidden');
+                } else {
+                    data.history.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${item.question_text}</td>
+                            <td>${item.user_answer}</td>
+                            <td>${item.correct_answer}</td>
+                            <td>${item.is_correct ? '<span style="color:var(--success)">Correct</span>' : '<span style="color:var(--error)">Incorrect</span>'}</td>
+                            <td>${new Date(item.timestamp).toLocaleDateString()}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            }
+        }
+
+        loadStats();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solution View - StudentQA</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .solution-card {
+            border-left: 4px solid var(--border);
+            margin-bottom: 2rem;
+            background: var(--surface);
+        }
+
+        .solution-card.correct-answer {
+            border-left-color: var(--success);
+        }
+
+        .solution-card.wrong-answer {
+            border-left-color: var(--error);
+        }
+
+        .badge-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .bg-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .bg-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        .answer-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.95rem;
+        }
+
+        .val-correct {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .val-wrong {
+            color: var(--error);
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .val-user {
+            color: var(--primary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo">Student<span>QA</span></div>
+        <div class="nav-links">
+            <a href="dashboard.html">Back to Dashboard</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container animate-fade-in">
+        <div class="flex justify-between items-center mb-8">
+            <h2>Exam Solutions</h2>
+            <div class="card" style="padding: 0.5rem 1.5rem; margin: 0;">
+                <span id="score-display" style="font-weight: 700; font-size: 1.2rem;">Score: --/--</span>
+            </div>
+        </div>
+
+        <div id="solutions-container">
+            <!-- Solutions Loaded Here -->
+            <div class="text-center p-8">Loading solutions...</div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        checkAuth(); // Allow both student and admin
+
+        async function loadSolutions() {
+            // Check if we are viewing a specific student as admin (via URL param)
+            const urlParams = new URLSearchParams(window.location.search);
+            const studentId = urlParams.get('studentId');
+
+            let endpoint = '/stats';
+            if (studentId) {
+                // Determine if we need a special admin route or just reuse logic
+                // For simplicity in this demo, we assume the user is viewing their OWN stats 
+                // unless we implement a specific admin-view-student-details API.
+                // Since the user request implies just seeing "all questions and answer", 
+                // we will use the history from /stats which returns ALL attempts.
+            }
+
+            const { status, data } = await apiCall(endpoint);
+
+            if (status === 200) {
+                const container = document.getElementById('solutions-container');
+                container.innerHTML = '';
+
+                document.getElementById('score-display').innerText = `Score: ${data.score}/${data.total}`;
+
+                if (data.history.length === 0) {
+                    container.innerHTML = '<div class="text-center text-muted">No exam history found.</div>';
+                    return;
+                }
+
+                data.history.forEach((item, index) => {
+                    const isCorrect = item.is_correct;
+                    const isSkipped = item.status === 'skipped';
+
+                    let cardClass = 'solution-card ';
+                    let statusBadge = '';
+
+                    if (isSkipped) {
+                        cardClass += 'wrong-answer'; // Treat as wrong/action needed
+                        statusBadge = '<span class="badge-status" style="background:rgba(255,255,255,0.1); color:var(--text-muted);">Not Attempted</span>';
+                    } else if (isCorrect) {
+                        cardClass += 'correct-answer';
+                        statusBadge = '<span class="badge-status bg-success">Correct</span>';
+                    } else {
+                        cardClass += 'wrong-answer';
+                        statusBadge = '<span class="badge-status bg-error">Incorrect</span>';
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = `card ${cardClass}`;
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 style="font-size: 1.1rem; color: var(--text-main); margin: 0;">
+                                <span style="opacity: 0.5; margin-right: 0.5rem;">Q${index + 1}.</span> 
+                                ${item.question_text}
+                            </h3>
+                            ${statusBadge}
+                        </div>
+                        
+                        <div class="answer-row">
+                            <div>
+                                <span style="display:block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.2rem;">YOUR ANSWER</span>
+                                <span class="${isCorrect ? 'val-correct' : (isSkipped ? 'text-muted' : 'val-wrong')}">${item.user_answer}</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="display:block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.2rem;">CORRECT ANSWER</span>
+                                <span class="val-correct">${item.correct_answer}</span>
+                            </div>
+                        </div>
+                    `;
+
+                    container.appendChild(card);
+                });
+            } else {
+                document.getElementById('solutions-container').innerHTML = '<div class="text-center text-muted">Failed to load data.</div>';
+            }
+        }
+
+        loadSolutions();
+    </script>
+</body>
+
+</html>
