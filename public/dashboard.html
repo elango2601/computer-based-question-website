@@ -37,9 +37,10 @@
         </div>
 
         <div class="flex justify-between items-center mb-8">
-            <h2>Recent Activity</h2>
+            <h2>Actions</h2>
             <div class="flex gap-4">
-                <a href="solution.html" class="btn btn-secondary">View Detailed Solutions</a>
+                <a href="solution.html" id="btn-view-solutions" class="btn btn-secondary hidden">View Detailed
+                    Solutions</a>
                 <a href="quiz.html" class="btn btn-primary">Start New Quiz</a>
             </div>
         </div>
@@ -60,6 +61,11 @@
                 document.getElementById('stat-accuracy').innerHTML = `${accuracy}<span style="font-size: 1rem">%</span>`;
 
                 // History table removed from dashboard
+
+                // Only show solutions button if they have actually taken a test
+                if (data.total > 0) {
+                    document.getElementById('btn-view-solutions').classList.remove('hidden');
+                }
             }
         }
 
