@@ -44,23 +44,7 @@
             </div>
         </div>
 
-        <div class="card" style="padding: 0; overflow: hidden;">
-            <table id="history-table">
-                <thead>
-                    <tr>
-                        <th>Question</th>
-                        <th>Your Answer</th>
-                        <th>Correct Answer</th>
-                        <th>Result</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody id="history-body">
-                    <!-- Loaded dynamically -->
-                </tbody>
-            </table>
-            <div id="no-data" class="text-center p-4 text-muted hidden">No activity yet. Start a quiz!</div>
-        </div>
+        <!-- History table removed as per user request to declutter dashboard -->
     </div>
 
     <script src="js/main.js"></script>
@@ -75,24 +59,7 @@
                 const accuracy = data.total > 0 ? Math.round((data.score / data.total) * 100) : 0;
                 document.getElementById('stat-accuracy').innerHTML = `${accuracy}<span style="font-size: 1rem">%</span>`;
 
-                const tbody = document.getElementById('history-body');
-                tbody.innerHTML = '';
-
-                if (data.history.length === 0) {
-                    document.getElementById('no-data').classList.remove('hidden');
-                } else {
-                    data.history.forEach(item => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>${item.question_text}</td>
-                            <td>${item.user_answer}</td>
-                            <td>${item.correct_answer}</td>
-                            <td>${item.is_correct ? '<span style="color:var(--success)">Correct</span>' : '<span style="color:var(--error)">Incorrect</span>'}</td>
-                            <td>${new Date(item.timestamp).toLocaleDateString()}</td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
+                // History table removed from dashboard
             }
         }
 
