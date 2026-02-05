@@ -7,6 +7,12 @@ from functools import wraps
 
 app = Flask(__name__, static_folder='public', static_url_path='')
 app.secret_key = 'secret-key-replace-in-prod'
+
+# Production Config for Cookies (Essential for Safari/Mobile)
+if os.environ.get('RENDER'):
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 DB_PATH = os.path.join(os.path.dirname(__file__), 'database.sqlite')
 
 # --- Database Helpers ---
