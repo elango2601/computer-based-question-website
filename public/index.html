@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - StudentQA</title>
+    <title>Login - StudentQA | Best Online Practice Platform</title>
+    <meta name="description"
+        content="Secure Online Examination Platform for Practice and Assessment. Join StudentQA to test your skills in Matrices, Calculus, and more.">
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <div class="container flex flex-col items-center justify-center" style="min-height: 100vh;">
         <div class="header text-center mb-8 animate-fade-in">
@@ -16,8 +20,10 @@
         <div id="auth-container" class="card w-full animate-fade-in" style="animation-delay: 0.1s;">
             <!-- Simple Tab Switch -->
             <div class="flex mb-8 border-b" style="border-color: var(--border);">
-                <button id="tab-login" class="btn btn-secondary w-full" style="border: none; border-bottom: 2px solid var(--primary); border-radius: 0;">Login</button>
-                <button id="tab-register" class="btn btn-secondary w-full" style="border: none; border-bottom: 2px solid transparent; border-radius: 0; opacity: 0.5;">Register</button>
+                <button id="tab-login" class="btn btn-secondary w-full"
+                    style="border: none; border-bottom: 2px solid var(--primary); border-radius: 0;">Login</button>
+                <button id="tab-register" class="btn btn-secondary w-full"
+                    style="border: none; border-bottom: 2px solid transparent; border-radius: 0; opacity: 0.5;">Register</button>
             </div>
 
             <!-- Login Form -->
@@ -84,7 +90,7 @@
             e.preventDefault();
             const formData = new FormData(loginForm);
             const body = Object.fromEntries(formData);
-            
+
             const res = await apiCall('/login', 'POST', body);
             if (res.status === 200) {
                 showToast('Login successful', 'success');
@@ -100,7 +106,7 @@
             e.preventDefault();
             const formData = new FormData(registerForm);
             const body = Object.fromEntries(formData);
-            
+
             const res = await apiCall('/register', 'POST', body);
             if (res.status === 200) {
                 showToast('Registration successful! Please login.', 'success');
@@ -111,4 +117,5 @@
         };
     </script>
 </body>
+
 </html>
