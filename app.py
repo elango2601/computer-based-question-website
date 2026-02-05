@@ -338,6 +338,34 @@ def delete_question(q_id):
     db.commit()
     return jsonify({"success": True})
 
+# API: Admin Stats (Restored)
+@app.route('/api/admin/stats', methods=['GET'])
+@admin_required
+def admin_stats():
+    db = get_db()
+    
+    # Get all students
+    users = db.execute("SELECT id, username FROM users WHERE role = 'student'").fetchall()
+    
+    stats = []
+    for user in users:
+        # Get total questions answered across ALL tests
+        res = db.execute('''
+            SELECT 
+                COUNT(*) as total_answered,
+                SUM(CASE WHEN is_correct = 1 THEN 1 ELSE 0 END) as total_score
+            FROM results 
+            WHERE user_id = ?
+        ''', (user['id'],)).fetchone()
+        
+        stats.append({
+            "username": user['username'],
+            "totalAnswered": res['total_answered'] or 0,
+            "score": res['total_score'] or 0
+        })
+        
+    return jsonify(stats)
+
 if __name__ == '__main__':
     # Only run seeds if DB doesn't exist (basic check)
     if not os.path.exists(DB_PATH):
