@@ -264,6 +264,38 @@ def admin_stats():
         
     return jsonify(stats)
 
+# API: Add Question (Admin)
+@app.route('/api/admin/questions', methods=['POST'])
+@admin_required
+def add_question():
+    data = request.json
+    text = data.get('text')
+    q_type = data.get('type', 'mcq')
+    options = data.get('options', [])
+    correct = data.get('correct_answer')
+    category = data.get('category', 'General')
+    difficulty = data.get('difficulty', 'Medium')
+
+    if not text or not correct:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    db = get_db()
+    db.execute("INSERT INTO questions (text, type, options, correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?)",
+               (text, q_type, json.dumps(options), correct, category, difficulty))
+    db.commit()
+    
+    return jsonify({"success": True})
+
+# API: Delete Question (Admin)
+@app.route('/api/admin/questions/<int:q_id>', methods=['DELETE'])
+@admin_required
+def delete_question(q_id):
+    db = get_db()
+    db.execute("DELETE FROM questions WHERE id = ?", (q_id,))
+    db.execute("DELETE FROM results WHERE question_id = ?", (q_id,)) # Cleanup results
+    db.commit()
+    return jsonify({"success": True})
+
 if __name__ == '__main__':
     # Only run seeds if DB doesn't exist (basic check)
     if not os.path.exists(DB_PATH):
