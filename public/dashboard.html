@@ -19,57 +19,74 @@
     </nav>
 
     <div class="container animate-fade-in">
-        <h2 class="mb-8">Your Progress</h2>
-
-        <div class="stats-grid">
-            <div class="card stat-card">
-                <div class="stat-value" id="stat-total">0</div>
-                <div class="stat-label">Questions Answered</div>
-            </div>
-            <div class="card stat-card">
-                <div class="stat-value" id="stat-score">0</div>
-                <div class="stat-label">Correct Answers</div>
-            </div>
-            <div class="card stat-card">
-                <div class="stat-value" id="stat-accuracy">0%</div>
-                <div class="stat-label">Accuracy</div>
-            </div>
+        <h2 class="mb-4">Available Exams</h2>
+        <div id="tests-grid"
+            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+            <!-- Tests loaded dynamically -->
+            <div class="text-center p-8" style="grid-column: 1/-1;">Loading available exams...</div>
         </div>
-
-        <div class="flex justify-between items-center mb-8">
-            <h2>Actions</h2>
-            <div class="flex gap-4">
-                <a href="solution.html" id="btn-view-solutions" class="btn btn-secondary hidden">View Detailed
-                    Solutions</a>
-                <a href="quiz.html" class="btn btn-primary">Start New Quiz</a>
-            </div>
-        </div>
-
-        <!-- History table removed as per user request to declutter dashboard -->
     </div>
 
     <script src="js/main.js"></script>
     <script>
         checkAuth('student');
 
-        async function loadStats() {
-            const { status, data } = await apiCall('/stats');
+        async function loadTests() {
+            const { status, data } = await apiCall('/tests');
+            const grid = document.getElementById('tests-grid');
+            grid.innerHTML = '';
+
             if (status === 200) {
-                document.getElementById('stat-total').innerText = data.total;
-                document.getElementById('stat-score').innerText = data.score;
-                const accuracy = data.total > 0 ? Math.round((data.score / data.total) * 100) : 0;
-                document.getElementById('stat-accuracy').innerHTML = `${accuracy}<span style="font-size: 1rem">%</span>`;
-
-                // History table removed from dashboard
-
-                // Only show solutions button if they have actually taken a test
-                if (data.total > 0) {
-                    document.getElementById('btn-view-solutions').classList.remove('hidden');
+                if (data.length === 0) {
+                    grid.innerHTML = '<div class="text-center text-muted" style="grid-column: 1/-1">No exams scheduled.</div>';
+                    return;
                 }
+
+                const today = new Date().toISOString().split('T')[0];
+
+                data.forEach(test => {
+                    const card = document.createElement('div');
+                    card.className = 'card test-card';
+                    card.style.display = 'flex';
+                    card.style.flexDirection = 'column';
+
+                    let statusBadge = '';
+                    let actionButton = '';
+                    const scheduledDate = test.scheduled_date; // YYYY-MM-DD
+
+                    // Logic for test availability
+                    if (scheduledDate > today) {
+                        statusBadge = '<span style="background:var(--warning); color:black; padding:2px 8px; border-radius:4px; font-size:0.8rem">Upcoming</span>';
+                        actionButton = `<button class="btn btn-secondary" disabled style="opacity:0.5; width:100%">Available on ${scheduledDate}</button>`;
+                    } else if (test.is_completed) {
+                        statusBadge = '<span style="background:var(--success); color:white; padding:2px 8px; border-radius:4px; font-size:0.8rem">Completed</span>';
+                        actionButton = `<a href="solution.html?id=${test.id}" class="btn btn-secondary" style="width:100%">View Solutions</a>
+                                         <div class="text-center mt-2 text-sm">Score: ${test.score}/${test.total_questions}</div>`;
+                    } else {
+                        statusBadge = '<span style="background:var(--primary); color:white; padding:2px 8px; border-radius:4px; font-size:0.8rem">Active</span>';
+                        actionButton = `<a href="quiz.html?id=${test.id}" class="btn btn-primary" style="width:100%">Start Exam</a>`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 style="margin:0">${test.title}</h3>
+                            ${statusBadge}
+                        </div>
+                        <p class="text-muted mb-4 text-sm" style="flex-grow:1">${test.description}</p>
+                        <div class="text-xs text-muted mb-4">
+                            📅 Date: ${test.scheduled_date} <br>
+                            ⏰ Duration: ${test.duration_minutes} mins
+                        </div>
+                        <div class="mt-auto">
+                            ${actionButton}
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
             }
         }
 
-        loadStats();
+        loadTests();
     </script>
 </body>
 

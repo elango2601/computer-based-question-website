@@ -94,19 +94,17 @@
         checkAuth(); // Allow both student and admin
 
         async function loadSolutions() {
-            // Check if we are viewing a specific student as admin (via URL param)
+            // Check if we are viewing a specific test (via URL param)
             const urlParams = new URLSearchParams(window.location.search);
-            const studentId = urlParams.get('studentId');
+            const testId = urlParams.get('id');
 
-            let endpoint = '/stats';
-            if (studentId) {
-                // Determine if we need a special admin route or just reuse logic
-                // For simplicity in this demo, we assume the user is viewing their OWN stats 
-                // unless we implement a specific admin-view-student-details API.
-                // Since the user request implies just seeing "all questions and answer", 
-                // we will use the history from /stats which returns ALL attempts.
+            if (!testId) {
+                alert("No test specified.");
+                window.location.href = 'dashboard.html';
+                return;
             }
 
+            const endpoint = `/tests/${testId}/stats`;
             const { status, data } = await apiCall(endpoint);
 
             if (status === 200) {

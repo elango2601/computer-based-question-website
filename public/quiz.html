@@ -331,11 +331,19 @@
             window.location.href = 'dashboard.html';
         }
 
+        let testId = new URLSearchParams(window.location.search).get('id');
+
         async function initQuiz() {
-            const { status, data } = await apiCall('/questions');
+            if (!testId) {
+                alert("No test specified.");
+                window.location.href = "dashboard.html";
+                return;
+            }
+
+            const { status, data } = await apiCall(`/tests/${testId}/questions`);
             if (status === 200) {
                 if (data.length === 0) {
-                    document.getElementById('loading').innerText = "No questions available.";
+                    document.getElementById('loading').innerText = "No questions available for this exam.";
                     return;
                 }
                 questions = data;
@@ -455,7 +463,8 @@
             // Send to API
             const res = await apiCall('/submit', 'POST', {
                 questionId: q.id,
-                answer: answer
+                answer: answer,
+                testId: testId
             });
 
             if (res.status === 200) {
