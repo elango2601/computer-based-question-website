@@ -395,13 +395,12 @@
             const submitBtn = document.getElementById('submit-btn');
 
             if (isAnswered) {
-                submitBtn.disabled = true;
-                submitBtn.innerText = "Saved";
-                submitBtn.style.opacity = "0.5";
+                submitBtn.innerText = "Update Answer";
+                submitBtn.style.opacity = "1";
 
                 // Show a "Saved" feedback
                 const feedback = document.getElementById('feedback-area');
-                feedback.innerHTML = "Answer Saved";
+                feedback.innerHTML = "Answer Saved (You can change it)";
                 feedback.className = "feedback saved";
                 feedback.classList.remove('hidden');
             } else {
@@ -415,20 +414,16 @@
                     const btn = document.createElement('div');
                     btn.className = 'option-btn';
                     btn.innerText = opt;
-                    if (!isAnswered) {
-                        btn.onclick = () => selectOption(btn, opt);
-                    } else {
-                        btn.style.cursor = 'default';
-                        // Ideally we would show what they selected, but we don't store it locally right now easily without fetching stats. 
-                        // For this simple version, we just lock it.
-                    }
+                    // Always allow clicking
+                    btn.onclick = () => selectOption(btn, opt);
+
                     container.appendChild(btn);
                 });
             } else {
                 document.getElementById('text-answer-container').classList.remove('hidden');
                 document.getElementById('text-answer').value = '';
-                if (isAnswered) document.getElementById('text-answer').disabled = true;
-                else document.getElementById('text-answer').disabled = false;
+                // Always allow typing
+                document.getElementById('text-answer').disabled = false;
             }
         }
 
@@ -474,7 +469,12 @@
                 feedback.className = "feedback saved";
                 feedback.classList.remove('hidden');
 
-                document.getElementById('submit-btn').innerText = "Saved";
+                document.getElementById('submit-btn').innerText = "Update Answer";
+
+                // Re-enable input for further editing
+                document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'auto');
+                document.getElementById('text-answer').disabled = false;
+                document.getElementById('submit-btn').disabled = false;
 
                 // Auto advance after 1s
                 setTimeout(() => {
@@ -486,6 +486,8 @@
                 showToast("Failed to save answer. Try again.", "error");
                 document.getElementById('submit-btn').disabled = false;
                 document.getElementById('submit-btn').innerText = "Save Answer";
+                document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'auto');
+                document.getElementById('text-answer').disabled = false;
             }
         }
     </script>
