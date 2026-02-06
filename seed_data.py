@@ -1,86 +1,34 @@
-import sqlite3
 import json
+import datetime
 import os
 from werkzeug.security import generate_password_hash
+from extensions import db
+from models import User, Test, Question, Result
 
-DB_PATH = os.path.join(os.path.dirname(__file__), 'database.sqlite')
-
-def seed():
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-
-    # Create Tables
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE,
-            password TEXT,
-            role TEXT DEFAULT 'student',
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS tests (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            description TEXT,
-            scheduled_date DATE,
-            duration_minutes INTEGER DEFAULT 60,
-            is_active BOOLEAN DEFAULT 1
-        )
-    ''')
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS questions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            test_id INTEGER,
-            text TEXT,
-            type TEXT, 
-            options TEXT,
-            correct_answer TEXT,
-            category TEXT,
-            difficulty TEXT,
-            FOREIGN KEY (test_id) REFERENCES tests(id)
-        )
-    ''')
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS results (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            test_id INTEGER,
-            question_id INTEGER,
-            user_answer TEXT,
-            is_correct BOOLEAN,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id),
-            FOREIGN KEY (test_id) REFERENCES tests(id),
-            FOREIGN KEY (question_id) REFERENCES questions(id)
-        )
-    ''')
+def seed_db():
+    print("Seeding database...")
+    db.create_all()
 
     # ADMIN
-    admin = cursor.execute("SELECT * FROM users WHERE username = ?", ('admin',)).fetchone()
-    if not admin:
+    if not User.query.filter_by(username='admin').first():
         hash_pw = generate_password_hash('admin123')
-        cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", ('admin', hash_pw, 'admin'))
+        admin = User(username='admin', password=hash_pw, role='admin')
+        db.session.add(admin)
         print("Admin user created.")
 
     # STUDENT
-    student = cursor.execute("SELECT * FROM users WHERE username = ?", ('student',)).fetchone()
-    if not student:
+    if not User.query.filter_by(username='student').first():
         hash_pw = generate_password_hash('student123')
-        cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", ('student', hash_pw, 'student'))
+        student = User(username='student', password=hash_pw, role='student')
+        db.session.add(student)
         print("Student user created.")
 
-    # QUESTIONS
-    # Clear existing questions to update with the new bank
-    # TESTS
-    cursor.execute("DELETE FROM tests")
+    # RESET DATA
+    db.session.query(Result).delete()
+    db.session.query(Question).delete()
+    db.session.query(Test).delete()
+    db.session.commit() # Commit deletions first to be safe
     
-    # Calculate dates: Yesterday, Today, Tomorrow
-    import datetime
     today = datetime.date.today()
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
@@ -92,18 +40,17 @@ def seed():
     ]
     
     test_ids = []
-    for t in tests_data:
-        cursor.execute("INSERT INTO tests (title, description, scheduled_date) VALUES (?, ?, ?)", t)
-        test_ids.append(cursor.lastrowid)
-        
+    for title, desc, date in tests_data:
+        t = Test(title=title, description=desc, scheduled_date=date)
+        db.session.add(t)
+        db.session.flush()
+        test_ids.append(t.id)
+    
     print(f"Created {len(test_ids)} tests.")
 
-    # QUESTIONS
-    # Clear existing questions to update with the new bank
-    cursor.execute("DELETE FROM questions")
-    
+    # QUESTIONS (Units 5-8 + Book Inside)
     questions_list = [
-        # UNIT 5 - 2D Analytical Geometry II (12 Questions)
+        # UNIT 5 - 2D Analytical Geometry II
         {"text": "The eccentricity of a circle is", "type": "mcq", "options": ["0", "1", "< 1", "> 1"], "correct": "0", "cat": "2D Analytical Geo", "diff": "Easy", "test_idx": 1},
         {"text": "The centre of the circle x² + y² + 4x - 6y + 9 = 0 is", "type": "mcq", "options": ["(-2, 3)", "(2, -3)", "(-4, 6)", "(4, -6)"], "correct": "(-2, 3)", "cat": "2D Analytical Geo", "diff": "Medium", "test_idx": 1},
         {"text": "The equation of the director circle of x² + y² = a² is", "type": "mcq", "options": ["x² + y² = a²", "x² + y² = 2a²", "x² + y² = 4a²", "x² + y² = 0"], "correct": "x² + y² = 2a²", "cat": "2D Analytical Geo", "diff": "Medium", "test_idx": 1},
@@ -177,13 +124,18 @@ def seed():
     print(f"Adding {len(questions_list)} questions...")
     for q in questions_list:
         test_id = test_ids[q['test_idx']]
-        cursor.execute(
-            "INSERT INTO questions (test_id, text, type, options, correct_answer, category, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (test_id, q['text'], q['type'], json.dumps(q['options']), q['correct'], q['cat'], q['diff'])
+        new_q = Question(
+            test_id=test_id,
+            text=q['text'],
+            type=q['type'],
+            options=json.dumps(q['options']),
+            correct_answer=q['correct'],
+            category=q['cat'],
+            difficulty=q['diff']
         )
+        db.session.add(new_q)
 
-    conn.commit()
-    conn.close()
+    db.session.commit()
     print("Database seeded successfully.")
 
 if __name__ == '__main__':
