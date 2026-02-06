@@ -25,6 +25,26 @@
             <!-- Tests loaded dynamically -->
             <div class="text-center p-8" style="grid-column: 1/-1;">Loading available exams...</div>
         </div>
+
+        <h2 class="mt-12 mb-4">Exam History</h2>
+        <div class="card p-0 overflow-hidden">
+            <table style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.05);">
+                        <th style="text-align: left; padding: 1rem;">Date</th>
+                        <th style="text-align: left; padding: 1rem;">Exam Name</th>
+                        <th style="text-align: center; padding: 1rem;">Score</th>
+                        <th style="text-align: center; padding: 1rem;">Percentage</th>
+                        <th style="text-align: right; padding: 1rem;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                    <tr>
+                        <td colspan="5" class="text-center p-4 text-muted">No completed exams found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script src="js/main.js"></script>
@@ -34,6 +54,8 @@
         async function loadTests() {
             const { status, data } = await apiCall('/tests');
             const grid = document.getElementById('tests-grid');
+            const historyBody = document.getElementById('history-body');
+
             grid.innerHTML = '';
 
             if (status === 200) {
@@ -43,8 +65,17 @@
                 }
 
                 const today = new Date().toISOString().split('T')[0];
+                let hasHistory = false;
+                historyBody.innerHTML = '';
 
                 data.forEach(test => {
+                    const scheduledDate = test.scheduled_date; // YYYY-MM-DD
+
+                    // 1. Available Exams Grid
+                    // If not completed and date >= today (or past but still active/unattempted)
+                    // Actually, let's show all upcoming or active tests in grid.
+                    // If completed, maybe still show but with "View Results"
+
                     const card = document.createElement('div');
                     card.className = 'card test-card';
                     card.style.display = 'flex';
@@ -52,7 +83,6 @@
 
                     let statusBadge = '';
                     let actionButton = '';
-                    const scheduledDate = test.scheduled_date; // YYYY-MM-DD
 
                     // Logic for test availability
                     if (scheduledDate > today) {
@@ -62,11 +92,34 @@
                         statusBadge = '<span style="background:var(--success); color:white; padding:2px 8px; border-radius:4px; font-size:0.8rem">Completed</span>';
                         actionButton = `<a href="solution.html?id=${test.id}" class="btn btn-secondary" style="width:100%">View Solutions</a>
                                          <div class="text-center mt-2 text-sm">Score: ${test.score}/${test.total_questions}</div>`;
+
+                        // Add to History
+                        hasHistory = true;
+                        const percent = test.total_questions > 0 ? Math.round((test.score / test.total_questions) * 100) : 0;
+                        let color = 'var(--text-muted)';
+                        if (percent >= 80) color = 'var(--success)';
+                        else if (percent >= 50) color = 'var(--primary)';
+                        else color = 'var(--error)';
+
+                        const row = document.createElement('tr');
+                        row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                        row.innerHTML = `
+                            <td style="padding: 1rem;"><span class="text-muted text-sm">${test.scheduled_date}</span></td>
+                            <td style="padding: 1rem; font-weight: 500;">${test.title}</td>
+                            <td style="padding: 1rem; text-align: center;">${test.score} / ${test.total_questions}</td>
+                            <td style="padding: 1rem; text-align: center; color: ${color}; font-weight: 700;">${percent}%</td>
+                            <td style="padding: 1rem; text-align: right;">
+                                <a href="solution.html?id=${test.id}" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">View Analysis &rarr;</a>
+                            </td>
+                        `;
+                        historyBody.appendChild(row);
+
                     } else {
                         statusBadge = '<span style="background:var(--primary); color:white; padding:2px 8px; border-radius:4px; font-size:0.8rem">Active</span>';
                         actionButton = `<a href="quiz.html?id=${test.id}" class="btn btn-primary" style="width:100%">Start Exam</a>`;
                     }
 
+                    // Always add to grid (or maybe only if not completed? User preference. Let's keep all for now so they can access solutions via grid too)
                     card.innerHTML = `
                         <div class="flex justify-between items-start mb-2">
                             <h3 style="margin:0">${test.title}</h3>
@@ -83,6 +136,10 @@
                     `;
                     grid.appendChild(card);
                 });
+
+                if (!hasHistory) {
+                    historyBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-muted">No completed exams found yet.</td></tr>';
+                }
             }
         }
 

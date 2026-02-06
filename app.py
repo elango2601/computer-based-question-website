@@ -187,17 +187,20 @@ def get_tests():
     for t in tests:
         t_dict = dict(t)
         # Check if user has attempted this test
-        # We define "attempted" as having at least one result record for this test_id
         attempt = db.execute("SELECT COUNT(*) as count FROM results WHERE user_id = ? AND test_id = ?", (user_id, t['id'])).fetchone()
         t_dict['is_completed'] = attempt['count'] > 0
         
+        # Get total questions for this test (Correct logic: from questions table)
+        total_q = db.execute("SELECT COUNT(*) as count FROM questions WHERE test_id = ?", (t['id'],)).fetchone()['count']
+        t_dict['total_questions'] = total_q
+        
         # Calculate scores if completed
         if t_dict['is_completed']:
-            score_data = db.execute("SELECT COUNT(*) as total, SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as score FROM results WHERE user_id = ? AND test_id = ?", (user_id, t['id'])).fetchone()
-             # Convert None to 0 for score
+            score_data = db.execute("SELECT SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as score FROM results WHERE user_id = ? AND test_id = ?", (user_id, t['id'])).fetchone()
             correct_count = score_data['score'] if score_data['score'] is not None else 0
             t_dict['score'] = correct_count
-            t_dict['total_questions'] = score_data['total']
+        else:
+            t_dict['score'] = 0
             
         result.append(t_dict)
         
@@ -230,7 +233,7 @@ def get_test_stats(test_id):
     db = get_db()
     
     # 1. Basic Counts
-    total = db.execute("SELECT COUNT(*) as count FROM results WHERE user_id = ? AND test_id = ?", (user_id, test_id)).fetchone()['count']
+    total = db.execute("SELECT COUNT(*) as count FROM questions WHERE test_id = ?", (test_id,)).fetchone()['count']
     score = db.execute("SELECT COUNT(*) as count FROM results WHERE user_id = ? AND test_id = ? AND is_correct = 1", (user_id, test_id)).fetchone()['count']
     
     # 2. History
@@ -350,24 +353,34 @@ def delete_question(q_id):
 def admin_stats():
     db = get_db()
     
-    # Get all students
-    users = db.execute("SELECT id, username FROM users WHERE role = 'student'").fetchall()
+    attempts_query = '''
+        SELECT 
+            u.username,
+            t.title as test_title,
+            t.scheduled_date,
+            t.id as test_id,
+            SUM(CASE WHEN r.is_correct = 1 THEN 1 ELSE 0 END) as score
+        FROM results r
+        JOIN users u ON r.user_id = u.id
+        JOIN tests t ON r.test_id = t.id
+        WHERE u.role = 'student'
+        GROUP BY u.id, t.id
+        ORDER BY t.scheduled_date DESC, u.username ASC
+    '''
+    
+    rows = db.execute(attempts_query).fetchall()
     
     stats = []
-    for user in users:
-        # Get total questions answered across ALL tests
-        res = db.execute('''
-            SELECT 
-                COUNT(*) as total_answered,
-                SUM(CASE WHEN is_correct = 1 THEN 1 ELSE 0 END) as total_score
-            FROM results 
-            WHERE user_id = ?
-        ''', (user['id'],)).fetchone()
+    for row in rows:
+        # Get total questions for this test
+        total_q = db.execute("SELECT COUNT(*) as count FROM questions WHERE test_id = ?", (row['test_id'],)).fetchone()['count']
         
         stats.append({
-            "username": user['username'],
-            "totalAnswered": res['total_answered'] or 0,
-            "score": res['total_score'] or 0
+            "username": row['username'],
+            "testTitle": row['test_title'],
+            "date": row['scheduled_date'],
+            "totalQuestions": total_q,
+            "score": row['score']
         })
         
     return jsonify(stats)

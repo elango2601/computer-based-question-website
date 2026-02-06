@@ -76,10 +76,11 @@
             <table id="admin-table">
                 <thead>
                     <tr>
+                        <th>Date</th>
                         <th>Username</th>
-                        <th>Total Questions</th>
-                        <th>Score (Correct)</th>
-                        <th>Performance</th>
+                        <th>Test Title</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
                     </tr>
                 </thead>
                 <tbody id="admin-body">
@@ -103,10 +104,17 @@
                 const tbody = document.getElementById('admin-body');
                 tbody.innerHTML = '';
 
-                data.forEach(user => {
-                    const percent = user.totalAnswered > 0 ? Math.round((user.score / user.totalAnswered) * 100) : 0;
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">No test attempts recorded yet.</td></tr>';
+                    return;
+                }
+
+                data.forEach(row => {
+                    const total = row.totalQuestions || 0;
+                    const percent = total > 0 ? Math.round((row.score / total) * 100) : 0;
+
                     let color = 'var(--text-muted)';
-                    if (user.totalAnswered > 0) {
+                    if (total > 0) {
                         if (percent >= 80) color = 'var(--success)';
                         else if (percent >= 50) color = 'var(--primary)';
                         else color = 'var(--error)';
@@ -114,9 +122,10 @@
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td style="font-weight: 500; color: white;">${user.username}</td>
-                        <td>${user.totalAnswered}</td>
-                        <td>${user.score}</td>
+                        <td class="text-sm text-muted">${row.date || '-'}</td>
+                        <td style="font-weight: 500; color: white;">${row.username}</td>
+                        <td>${row.testTitle}</td>
+                        <td>${row.score} / ${total}</td>
                         <td style="color: ${color}; font-weight: 700;">${percent}%</td>
                     `;
                     tbody.appendChild(tr);
@@ -128,11 +137,12 @@
             if (!studentData.length) return showToast('No data to export', 'error');
 
             let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Username,Total Questions,Correct Answers,Performance (%)\n";
+            csvContent += "Date,Username,Test Title,Score,Total Questions,Percentage (%)\n";
 
             studentData.forEach(row => {
-                const percent = row.totalAnswered > 0 ? Math.round((row.score / row.totalAnswered) * 100) : 0;
-                csvContent += `${row.username},${row.totalAnswered},${row.score},${percent}\n`;
+                const total = row.totalQuestions || 0;
+                const percent = total > 0 ? Math.round((row.score / total) * 100) : 0;
+                csvContent += `${row.date},${row.username},${row.testTitle},${row.score},${total},${percent}\n`;
             });
 
             const encodedUri = encodeURI(csvContent);
@@ -147,12 +157,13 @@
         function exportSQL() {
             if (!studentData.length) return showToast('No data to export', 'error');
 
-            let sqlContent = "CREATE TABLE IF NOT EXISTS student_marks (username TEXT, total INT, score INT, percentage INT);\n";
+            let sqlContent = "CREATE TABLE IF NOT EXISTS student_marks (date DATE, username TEXT, test_title TEXT, score INT, total INT, percentage INT);\n";
             sqlContent += "INSERT INTO student_marks VALUES \n";
 
             const values = studentData.map(row => {
-                const percent = row.totalAnswered > 0 ? Math.round((row.score / row.totalAnswered) * 100) : 0;
-                return `('${row.username}', ${row.totalAnswered}, ${row.score}, ${percent})`;
+                const total = row.totalQuestions || 0;
+                const percent = total > 0 ? Math.round((row.score / total) * 100) : 0;
+                return `('${row.date}', '${row.username}', '${row.testTitle}', ${row.score}, ${total}, ${percent})`;
             }).join(",\n");
 
             sqlContent += values + ";";
