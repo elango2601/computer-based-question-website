@@ -23,12 +23,31 @@ def seed_db():
         db.session.add(student)
         print("Student user created.")
 
-    # RESET DATA
-    db.session.query(Result).delete()
-    db.session.query(Question).delete()
-    db.session.query(Test).delete()
-    db.session.commit() # Commit deletions first to be safe
+    # Lathika16
+    if not User.query.filter_by(username='Lathika16').first():
+        hash_pw = generate_password_hash('Lathika16')
+        lathika = User(username='Lathika16', password=hash_pw, role='student')
+        db.session.add(lathika)
+        print("Lathika16 user created.")
+
+    # Sharuhasan
+    if not User.query.filter_by(username='Sharuhasan').first():
+        hash_pw = generate_password_hash('Sharuhasan29')
+        sharu = User(username='Sharuhasan', password=hash_pw, role='student')
+        db.session.add(sharu)
+        print("Sharuhasan user created.")
+
+    # RESET DATA - DISABLED to prevent data loss on restart
+    # db.session.query(Result).delete()
+    # db.session.query(Question).delete()
+    # db.session.query(Test).delete()
+    # db.session.commit() 
     
+    # Only create tests/questions if they don't exist
+    if Test.query.first():
+        print("Tests already exist. Skipping data overwrite.")
+        return
+
     today = datetime.date.today()
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)

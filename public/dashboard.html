@@ -93,8 +93,9 @@
                         actionButton = `<button class="btn btn-secondary" disabled style="opacity:0.5; width:100%">Exam Expired</button>`;
                     } else if (test.is_completed) {
                         statusBadge = '<span style="background:var(--success); color:white; padding:2px 8px; border-radius:4px; font-size:0.8rem">Completed</span>';
+                        const cardPercent = test.total_questions > 0 ? Math.round((test.score / test.total_questions) * 100) : 0;
                         actionButton = `<a href="solution.html?id=${test.id}" class="btn btn-secondary" style="width:100%">View Solutions</a>
-                                         <div class="text-center mt-2 text-sm">Score: ${test.score}/${test.total_questions}</div>`;
+                                         <div class="text-center mt-2 text-sm">Score: ${test.score}/${test.total_questions} (${cardPercent}%)</div>`;
 
                         // Add to History
                         hasHistory = true;

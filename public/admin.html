@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - StudentQA</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -18,6 +19,23 @@
             <a href="#" onclick="logout()">Logout</a>
         </div>
     </nav>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="reset-modal" class="hidden"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center;">
+        <div class="card"
+            style="width:400px; text-align:center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); border: 1px solid var(--border);">
+            <div style="margin-bottom:15px; color:var(--error); font-size:3rem;">⚠️</div>
+            <h3 class="mb-4">Reset Student Data?</h3>
+            <p class="mb-6 text-muted">This will permanently delete the student's exam attempt. They will be able to
+                take the test again.</p>
+            <div class="flex justify-center gap-4">
+                <button class="btn btn-secondary" onclick="closeResetModal()">Cancel</button>
+                <button class="btn btn-primary" id="confirm-reset-btn" onclick="confirmForceReset()"
+                    style="background: var(--error); border-color: var(--error);">Yes, Reset Data</button>
+            </div>
+        </div>
+    </div>
 
     <div class="container animate-fade-in">
         <div class="flex justify-between items-center mb-8">
@@ -72,6 +90,14 @@
             </div>
         </div>
 
+        <!-- Analytics Chart -->
+        <div class="card mb-8">
+            <h3 class="mb-4">📈 Overall Performance Analysis</h3>
+            <div style="position: relative; height:400px; width:100%">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+
         <div class="card" style="padding: 0; overflow: hidden;">
             <table id="admin-table">
                 <thead>
@@ -96,17 +122,22 @@
     <script>
         checkAuth('admin');
         let studentData = [];
+        let resultToReset = null;
 
         async function loadData() {
             const { status, data } = await apiCall('/admin/stats');
             if (status === 200) {
                 studentData = data;
                 document.getElementById('loading').classList.add('hidden');
+
+                // Render Chart
+                renderChart(data);
+
                 const tbody = document.getElementById('admin-body');
                 tbody.innerHTML = '';
 
                 if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">No test attempts recorded yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center p-4">No test attempts recorded yet.</td></tr>';
                     return;
                 }
 
@@ -129,14 +160,89 @@
                         <td>${row.score} / ${total}</td>
                         <td style="color: ${color}; font-weight: 700;">${percent}%</td>
                         <td>
-                             <button onclick="viewAnswers(${row.userId}, ${row.testId})" style="background:var(--primary); border:none; color:white; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem; margin-right:5px;">View</button>
-                             <button onclick="viewAnswers(${row.userId}, ${row.testId})" style="background:var(--primary); border:none; color:white; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem; margin-right:5px;">View</button>
+                            <button onclick="viewAnswers(${row.userId}, ${row.testId})" style="background:var(--primary); border:none; color:white; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem; margin-right:5px;">View</button>
                              <button onclick="resetResult(${row.userId}, ${row.testId})" style="background:var(--error); border:none; color:white; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem">Reset</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
             }
+        }
+
+        let chartInstance = null;
+
+        function renderChart(data) {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+
+            // X-Axis: Student Names
+            // Datasets: Tests
+
+            const studentsSet = new Set();
+            const testsSet = new Set();
+            const scoresMap = {}; // Key: TestName, Value: { StudentName: Score }
+
+            data.forEach(d => {
+                studentsSet.add(d.username);
+                testsSet.add(d.testTitle);
+
+                if (!scoresMap[d.testTitle]) scoresMap[d.testTitle] = {};
+                scoresMap[d.testTitle][d.username] = d.score; // Raw Score
+            });
+
+            const studentLabels = Array.from(studentsSet).sort();
+            const testLabels = Array.from(testsSet);
+
+            const colors = ['#6366f1', '#22c55e', '#ef4444', '#eab308', '#ec4899', '#8b5cf6'];
+
+            const datasets = testLabels.map((testName, idx) => {
+                const color = colors[idx % colors.length];
+                return {
+                    label: testName,
+                    data: studentLabels.map(student => scoresMap[testName][student] !== undefined ? scoresMap[testName][student] : 0),
+                    backgroundColor: color,
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8
+                };
+            });
+
+            if (chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: studentLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: 60, // User requested reference to 60 marks
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#9ca3af' },
+                            title: { display: true, text: 'Score (Marks)', color: '#6b7280' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af' },
+                            title: { display: true, text: 'Students', color: '#6b7280' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: 'white' },
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    }
+                }
+            });
         }
 
         function exportCSV() {
@@ -255,16 +361,44 @@
             }
         }
 
-        async function resetResult(userId, testId) {
-            if (!confirm('Are you sure you want to RESET this student\'s attempt? They will be able to take the test again, and current data will be lost.')) return;
+        function resetResult(userId, testId) {
+            resultToReset = { userId, testId };
+            const modal = document.getElementById('reset-modal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+
+        function closeResetModal() {
+            const modal = document.getElementById('reset-modal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+            resultToReset = null;
+        }
+
+        async function confirmForceReset() {
+            if (!resultToReset) return;
+
+            const { userId, testId } = resultToReset;
+
+            // UI Feedback
+            const btn = document.getElementById('confirm-reset-btn');
+            const originalText = btn.innerText;
+            btn.innerText = 'Resetting...';
+            btn.disabled = true;
 
             const res = await apiCall(`/admin/reset_result/${userId}/${testId}`, 'DELETE');
+
             if (res.status === 200) {
                 showToast('Result reset successfully', 'success');
-                loadData(); // Refresh table
+                loadData();
             } else {
                 showToast('Failed to reset result', 'error');
             }
+
+            // Reset UI
+            btn.innerText = originalText;
+            btn.disabled = false;
+            closeResetModal();
         }
 
         async function viewAnswers(userId, testId) {

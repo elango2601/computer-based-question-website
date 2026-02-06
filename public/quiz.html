@@ -145,6 +145,23 @@
         </div>
     </div>
 
+    <!-- Custom Submit Modal -->
+    <div id="submit-modal" class="hidden"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+        <div class="card" style="width:400px; text-align:center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+            <h3 class="mb-4">Submit Exam?</h3>
+            <div id="submit-modal-body">
+                <!-- Content injected by JS -->
+            </div>
+            <div class="flex justify-center gap-4">
+                <button class="btn btn-secondary" onclick="closeSubmitModal()"
+                    style="border-color: var(--border);">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmForceSubmit()"
+                    style="background: var(--error); border-color: var(--error);">Yes, Submit</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Timer (Hidden initially) -->
     <div id="timer-display" class="hidden">60:00</div>
 
@@ -299,9 +316,47 @@
         }
 
         function manualSubmit() {
-            if (confirm("Are you sure you want to submit the exam? You cannot change answers after submitting.")) {
-                forceSubmit("Manual Submission.");
+            // Calculate stats
+            const total = questions.length;
+            const answered = answeredQuestions.size;
+            const pending = total - answered;
+
+            const modalBody = document.getElementById('submit-modal-body');
+            let html = '';
+
+            html += `<p class="mb-4" style="font-size:1.1rem">You have answered <strong>${answered}</strong> out of <strong>${total}</strong> questions.</p>`;
+
+            if (pending > 0) {
+                html += `<div style="background:rgba(239, 68, 68, 0.1); color:var(--error); padding:12px; border-radius:8px; margin-bottom:1.5rem; border:1px solid var(--error);">
+                            <strong style="display:block; margin-bottom:4px">⚠️ Warning</strong>
+                            You have missed <strong>${pending}</strong> question${pending > 1 ? 's' : ''}!
+                         </div>`;
+            } else {
+                html += `<div style="background:rgba(34, 197, 94, 0.1); color:var(--success); padding:12px; border-radius:8px; margin-bottom:1.5rem; border:1px solid var(--success);">
+                            <strong>✅ Excellent!</strong>
+                            All questions answered.
+                         </div>`;
             }
+
+            html += `<p class="text-muted mb-6" style="font-size:0.9rem">Are you sure you want to finish? You cannot return to the exam after submitting.</p>`;
+
+            modalBody.innerHTML = html;
+
+            // Show custom modal
+            const modal = document.getElementById('submit-modal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex'; // Ensure flex centering
+        }
+
+        function closeSubmitModal() {
+            const modal = document.getElementById('submit-modal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+
+        function confirmForceSubmit() {
+            closeSubmitModal();
+            forceSubmit("Manual Submission.");
         }
 
         function forceSubmit(reason) {

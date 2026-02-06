@@ -139,7 +139,7 @@ def get_tests():
         
         # Calculate scores if completed
         if t_dict['is_completed']:
-            total_questions = Result.query.filter_by(user_id=user_id, test_id=t.id).count()
+            total_questions = Question.query.filter_by(test_id=t.id).count()
             score = Result.query.filter_by(user_id=user_id, test_id=t.id, is_correct=True).count()
             t_dict['score'] = score
             t_dict['total_questions'] = total_questions
@@ -340,7 +340,7 @@ def admin_student_result(user_id, test_id):
 
     # Calculate score
     score = sum(1 for r in results if r.is_correct)
-    total = len(results)
+    total = Question.query.filter_by(test_id=test_id).count()
     
     # Prepare detailed list
     details = []
