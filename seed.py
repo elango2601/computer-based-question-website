@@ -87,7 +87,7 @@ def seed():
     
     tests_data = [
         ("Maths Phase 1 (Units 1-4)", "Topics: Matrices, Complex Numbers, Theory of Eq, Inv. Trig", yesterday),
-        ("Maths Phase 2 (Units 5-8)", "Topics: Two Dimensional Analytical Geometry-II,Applications of Vector Algebra,Applications of Differential Calculus,Differentials and Partial Derivatives", today),
+        ("Maths Phase 2 (Units 5-8)", "Topics: Two Dimensional Analytical Geometry – II, Applications of Vector Algebra, Applications of Differential Calculus, Differentials and Partial Derivatives", today),
         ("Maths Phase 3 (Units 9-12)", "Topics: Integration, Diff. Equations, Probability, Discrete Math", tomorrow)
     ]
     
