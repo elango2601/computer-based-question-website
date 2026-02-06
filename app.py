@@ -347,6 +347,23 @@ def delete_question(q_id):
     db.commit()
     return jsonify({"success": True})
 
+# API: Reset Student Result (Admin)
+@app.route('/api/admin/reset_result/<int:user_id>/<int:test_id>', methods=['DELETE'])
+@admin_required
+def reset_student_result(user_id, test_id):
+    db = get_db()
+    db.execute("DELETE FROM results WHERE user_id = ? AND test_id = ?", (user_id, test_id))
+    db.commit()
+    return jsonify({"success": True})
+
+# API: Get Users (Admin)
+@app.route('/api/admin/users', methods=['GET'])
+@admin_required
+def get_users():
+    db = get_db()
+    users = db.execute("SELECT id, username FROM users WHERE role = 'student'").fetchall()
+    return jsonify([dict(u) for u in users])
+
 # API: Admin Stats (Restored)
 @app.route('/api/admin/stats', methods=['GET'])
 @admin_required
@@ -355,6 +372,7 @@ def admin_stats():
     
     attempts_query = '''
         SELECT 
+            u.id as user_id,
             u.username,
             t.title as test_title,
             t.scheduled_date,
@@ -376,6 +394,7 @@ def admin_stats():
         total_q = db.execute("SELECT COUNT(*) as count FROM questions WHERE test_id = ?", (row['test_id'],)).fetchone()['count']
         
         stats.append({
+            "userId": row['user_id'],
             "username": row['username'],
             "testTitle": row['test_title'],
             "date": row['scheduled_date'],

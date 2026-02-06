@@ -81,6 +81,7 @@
                         <th>Test Title</th>
                         <th>Score</th>
                         <th>Percentage</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="admin-body">
@@ -127,6 +128,9 @@
                         <td>${row.testTitle}</td>
                         <td>${row.score} / ${total}</td>
                         <td style="color: ${color}; font-weight: 700;">${percent}%</td>
+                        <td>
+                             <button onclick="resetResult(${row.userId}, ${row.testId})" style="background:var(--error); border:none; color:white; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem">Reset</button>
+                        </td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -246,6 +250,18 @@
                 loadQuestions();
             } else {
                 showToast('Failed to delete', 'error');
+            }
+        }
+
+        async function resetResult(userId, testId) {
+            if (!confirm('Are you sure you want to RESET this student\'s attempt? They will be able to take the test again, and current data will be lost.')) return;
+
+            const res = await apiCall(`/admin/reset_result/${userId}/${testId}`, 'DELETE');
+            if (res.status === 200) {
+                showToast('Result reset successfully', 'success');
+                loadData(); // Refresh table
+            } else {
+                showToast('Failed to reset result', 'error');
             }
         }
     </script>
