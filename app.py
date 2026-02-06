@@ -56,7 +56,7 @@ def admin_required(f):
 def index():
     return send_from_directory('public', 'index.html')
 
-@app.route('/register', methods=['POST'])
+@app.route('/api/register', methods=['POST'])
 def register():
     data = request.json
     username = data.get('username')
