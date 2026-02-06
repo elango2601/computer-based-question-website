@@ -88,6 +88,9 @@
                     if (scheduledDate > today) {
                         statusBadge = '<span style="background:var(--warning); color:black; padding:2px 8px; border-radius:4px; font-size:0.8rem">Upcoming</span>';
                         actionButton = `<button class="btn btn-secondary" disabled style="opacity:0.5; width:100%">Available on ${scheduledDate}</button>`;
+                    } else if (scheduledDate < today && !test.is_completed) {
+                        statusBadge = '<span style="background:var(--error); color:white; padding:2px 8px; border-radius:4px; font-size:0.8rem">Expired</span>';
+                        actionButton = `<button class="btn btn-secondary" disabled style="opacity:0.5; width:100%">Exam Expired</button>`;
                     } else if (test.is_completed) {
                         statusBadge = '<span style="background:var(--success); color:white; padding:2px 8px; border-radius:4px; font-size:0.8rem">Completed</span>';
                         actionButton = `<a href="solution.html?id=${test.id}" class="btn btn-secondary" style="width:100%">View Solutions</a>
