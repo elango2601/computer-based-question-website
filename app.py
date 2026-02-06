@@ -330,6 +330,35 @@ def get_users():
     users = User.query.filter_by(role='student').all()
     return jsonify([{"id": u.id, "username": u.username} for u in users])
 
+@app.route('/api/admin/student_result/<int:user_id>/<int:test_id>', methods=['GET'])
+@admin_required
+def admin_student_result(user_id, test_id):
+    results = Result.query.filter_by(user_id=user_id, test_id=test_id).all()
+    
+    if not results:
+        return jsonify({'error': 'No results found'}), 404
+
+    # Calculate score
+    score = sum(1 for r in results if r.is_correct)
+    total = len(results)
+    
+    # Prepare detailed list
+    details = []
+    for r in results:
+        q = Question.query.get(r.question_id)
+        details.append({
+            'question_text': q.text if q else "Question Deleted",
+            'user_answer': r.user_answer,
+            'correct_answer': q.correct_answer if q else "N/A",
+            'is_correct': r.is_correct
+        })
+        
+    return jsonify({
+        'score': score,
+        'total': total,
+        'results': details
+    })
+
 @app.route('/api/admin/stats', methods=['GET'])
 @admin_required
 def admin_stats():
