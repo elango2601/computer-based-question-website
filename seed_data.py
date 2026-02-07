@@ -62,6 +62,11 @@ def seed_db():
             db.session.add(t)
             db.session.commit()
             print(f"Created Test: {title}")
+        else:
+            # Update date if exists (Fix for hosting date mismatch)
+            t.scheduled_date = dt
+            db.session.commit()
+            print(f"Updated Test Date: {title} -> {dt}")
         test_ids.append(t.id)
     
     print(f"Processed {len(test_ids)} tests.")
