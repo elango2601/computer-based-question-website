@@ -52,7 +52,8 @@ def seed_db():
         ("Maths Phase 1 (Units 1-4)", "Topics: Matrices, Complex Numbers, Theory of Eq, Inv. Trig", yesterday),
         ("Maths Phase 2 (Units 5-8)", "Topics: Two Dimensional Analytical Geometry – II, Applications of Vector Algebra, Applications of Differential Calculus, Differentials and Partial Derivatives", today),
         ("Maths Phase 3 (Units 9-12)", "Topics: Applications of Integration,Ordinary Differential Equations,Probability Distributions,Discrete Mathematics", today),
-        ("Physics Part 1 (Units 1-4)", "Topics: Electrostatics, Current Electricity, Magnetism, EMI & AC", today)
+        ("Physics Part 1 (Units 1-4)", "Topics: Electrostatics, Current Electricity, Magnetism, EMI & AC", today),
+        ("Physics Phase 3 (Units 5-8)", "Topics: EM Waves, Ray Optics, Wave Optics, Dual Nature", tomorrow)
     ]
 
     test_ids = []
@@ -215,6 +216,75 @@ def seed_db():
         {"text": "If P(A)=0.4, P(B)=0.5 and independent, then P(A ∩ B) is", "type": "mcq", "options": ["0.9", "0.2", "0.45", "0.1"], "correct": "0.2", "cat": "Probability", "diff": "Hard", "test_idx": 2},
         {"text": "p ↔ q is true when", "type": "mcq", "options": ["p is true and q is false", "p is false and q is true", "p and q have same truth value", "p and q have different truth values"], "correct": "p and q have same truth value", "cat": "Discrete Math", "diff": "Hard", "test_idx": 2},
         
+        # Physics Phase 3 (Units 5-8) - 60 Questions
+        # Unit 5 : Electromagnetic Waves
+        {"text": "The speed of electromagnetic waves in vacuum is", "type": "mcq", "options": ["c", "v", "c/n", "infinity"], "correct": "c", "cat": "EM Waves", "diff": "Easy", "test_idx": 4},
+        {"text": "Electromagnetic waves are", "type": "mcq", "options": ["longitudinal", "transverse", "both", "none"], "correct": "transverse", "cat": "EM Waves", "diff": "Easy", "test_idx": 4},
+        {"text": "The oscillating electric and magnetic fields are in phase and perpendicular to each other and to the direction of propagation.", "type": "mcq", "options": ["True", "False", "Sometimes", "Depends on medium"], "correct": "True", "cat": "EM Waves", "diff": "Easy", "test_idx": 4},
+        {"text": "Which of the following has the highest frequency?", "type": "mcq", "options": ["Radio waves", "Microwaves", "Gamma rays", "X-rays"], "correct": "Gamma rays", "cat": "EM Waves", "diff": "Medium", "test_idx": 4},
+        {"text": "The energy density of electric field in EM wave is", "type": "mcq", "options": ["½ε₀E²", "½μ₀H²", "E/B", "B/E"], "correct": "½ε₀E²", "cat": "EM Waves", "diff": "Medium", "test_idx": 4},
+        {"text": "The relation between E and B in EM waves is", "type": "mcq", "options": ["E = cB", "B = cE", "E = B", "E = B/c"], "correct": "E = cB", "cat": "EM Waves", "diff": "Easy", "test_idx": 4},
+        {"text": "Maxwell’s equations are based on", "type": "mcq", "options": ["Newton's laws", "Conservation laws", "Electromagnetic principles", "Quantum mechanics"], "correct": "Electromagnetic principles", "cat": "EM Waves", "diff": "Medium", "test_idx": 4},
+        {"text": "Displacement current is given by", "type": "mcq", "options": ["I_c", "ε₀ dΦ_E/dt", "μ₀ dΦ_B/dt", "I_d"], "correct": "ε₀ dΦ_E/dt", "cat": "EM Waves", "diff": "Hard", "test_idx": 4},
+        {"text": "The source of electromagnetic waves is", "type": "mcq", "options": ["stationary charge", "charge at constant velocity", "accelerated charge", "neutral particle"], "correct": "accelerated charge", "cat": "EM Waves", "diff": "Medium", "test_idx": 4},
+        {"text": "Poynting vector represents", "type": "mcq", "options": ["energy flux", "momentum", "force", "power"], "correct": "energy flux", "cat": "EM Waves", "diff": "Hard", "test_idx": 4},
+        {"text": "Which part of the EM spectrum is used in remote controls?", "type": "mcq", "options": ["Visible light", "Infrared", "Ultraviolet", "Microwaves"], "correct": "Infrared", "cat": "EM Waves", "diff": "Easy", "test_idx": 4},
+        {"text": "Ozone layer absorbs", "type": "mcq", "options": ["Infrared", "Visible light", "Ultraviolet", "Radio waves"], "correct": "Ultraviolet", "cat": "EM Waves", "diff": "Easy", "test_idx": 4},
+        {"text": "The wavelength range of visible light is approximately", "type": "mcq", "options": ["100-400 nm", "400-700 nm", "700-1000 nm", "1-10 mm"], "correct": "400-700 nm", "cat": "EM Waves", "diff": "Medium", "test_idx": 4},
+        {"text": "Which EM wave is used in MRI?", "type": "mcq", "options": ["X-rays", "Gamma rays", "Radio waves", "Microwaves"], "correct": "Radio waves", "cat": "EM Waves", "diff": "Medium", "test_idx": 4},
+        {"text": "The unit of Poynting vector is", "type": "mcq", "options": ["J/s", "W/m²", "N/m", "J m"], "correct": "W/m²", "cat": "EM Waves", "diff": "Hard", "test_idx": 4},
+
+        # Unit 6 : Ray Optics
+        {"text": "The phenomenon of light bending when passing from one medium to another is called", "type": "mcq", "options": ["reflection", "refraction", "diffraction", "polarization"], "correct": "refraction", "cat": "Ray Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "Snell's law relates", "type": "mcq", "options": ["angle of incidence and reflection", "angle of incidence and refraction", "wavelength and frequency", "speed and wavelength"], "correct": "angle of incidence and refraction", "cat": "Ray Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "Total internal reflection occurs when light travels from", "type": "mcq", "options": ["denser to rarer medium", "rarer to denser medium", "air to vacuum", "vacuum to air"], "correct": "denser to rarer medium", "cat": "Ray Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "The critical angle depends on", "type": "mcq", "options": ["intensity of light", "color of light", "size of medium", "shape of interface"], "correct": "color of light", "cat": "Ray Optics", "diff": "Medium", "test_idx": 4},
+        {"text": "A convex lens is a", "type": "mcq", "options": ["diverging lens", "converging lens", "plane mirror", "prism"], "correct": "converging lens", "cat": "Ray Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "The power of a lens is measured in", "type": "mcq", "options": ["meters", "centimeters", "diopters", "watts"], "correct": "diopters", "cat": "Ray Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "For a real image formed by a lens, the magnification is", "type": "mcq", "options": ["positive", "negative", "zero", "infinite"], "correct": "negative", "cat": "Ray Optics", "diff": "Medium", "test_idx": 4},
+        {"text": "The focal length of a plane mirror is", "type": "mcq", "options": ["zero", "infinity", "positive", "negative"], "correct": "infinity", "cat": "Ray Optics", "diff": "Medium", "test_idx": 4},
+        {"text": "Dispersion of light is the phenomenon of", "type": "mcq", "options": ["splitting of light into its constituent colors", "bending of light", "reflection of light", "scattering of light"], "correct": "splitting of light into its constituent colors", "cat": "Ray Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "Rainbow formation is due to", "type": "mcq", "options": ["reflection only", "refraction only", "dispersion and total internal reflection", "diffraction only"], "correct": "dispersion and total internal reflection", "cat": "Ray Optics", "diff": "Hard", "test_idx": 4},
+        {"text": "Myopia can be corrected by using a", "type": "mcq", "options": ["convex lens", "concave lens", "cylindrical lens", "bifocal lens"], "correct": "concave lens", "cat": "Ray Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "Hypermetropia can be corrected by using a", "type": "mcq", "options": ["convex lens", "concave lens", "cylindrical lens", "bifocal lens"], "correct": "convex lens", "cat": "Ray Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "The image formed by a simple microscope is", "type": "mcq", "options": ["real and inverted", "virtual and inverted", "real and erect", "virtual and erect"], "correct": "virtual and erect", "cat": "Ray Optics", "diff": "Medium", "test_idx": 4},
+        {"text": "The magnifying power of a compound microscope is increased by increasing the focal length of the", "type": "mcq", "options": ["eyepiece", "objective", "both", "none"], "correct": "objective", "cat": "Ray Optics", "diff": "Hard", "test_idx": 4},
+        {"text": "The resolving power of a telescope depends on", "type": "mcq", "options": ["focal length of objective", "diameter of objective", "wavelength of light", "both diameter and wavelength"], "correct": "both diameter and wavelength", "cat": "Ray Optics", "diff": "Hard", "test_idx": 4},
+
+        # Unit 7 : Wave Optics
+        {"text": "Huygens' principle states that every point on a wavefront is a source of", "type": "mcq", "options": ["light rays", "secondary wavelets", "particles", "energy"], "correct": "secondary wavelets", "cat": "Wave Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "Interference of light is the phenomenon of", "type": "mcq", "options": ["redistribution of light energy", "bending of light", "splitting of light", "scattering of light"], "correct": "redistribution of light energy", "cat": "Wave Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "For sustained interference, the sources must be", "type": "mcq", "options": ["monochromatic", "coherent", "incoherent", "polychromatic"], "correct": "coherent", "cat": "Wave Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "In Young's double-slit experiment, the fringe width is proportional to", "type": "mcq", "options": ["wavelength", "distance between slits", "distance to screen", "all of the above"], "correct": "wavelength", "cat": "Wave Optics", "diff": "Medium", "test_idx": 4},
+        {"text": "Diffraction is the phenomenon of", "type": "mcq", "options": ["bending of light around obstacles", "reflection of light", "refraction of light", "polarization of light"], "correct": "bending of light around obstacles", "cat": "Wave Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "Fraunhofer diffraction occurs when the source and screen are at", "type": "mcq", "options": ["finite distance", "infinite distance", "close to aperture", "any distance"], "correct": "infinite distance", "cat": "Wave Optics", "diff": "Medium", "test_idx": 4},
+        {"text": "Polarization of light proves that light waves are", "type": "mcq", "options": ["longitudinal", "transverse", "stationary", "mechanical"], "correct": "transverse", "cat": "Wave Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "Brewster's law relates the polarizing angle to the", "type": "mcq", "options": ["wavelength", "frequency", "refractive index", "intensity"], "correct": "refractive index", "cat": "Wave Optics", "diff": "Medium", "test_idx": 4},
+        {"text": "The condition for constructive interference is path difference =", "type": "mcq", "options": ["nλ", "(n+½)λ", "nλ/2", "0"], "correct": "nλ", "cat": "Wave Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "The condition for destructive interference is path difference =", "type": "mcq", "options": ["nλ", "(n+½)λ", "nλ/2", "0"], "correct": "(n+½)λ", "cat": "Wave Optics", "diff": "Easy", "test_idx": 4},
+        {"text": "The intensity of light in interference pattern is proportional to", "type": "mcq", "options": ["amplitude", "square of amplitude", "wavelength", "frequency"], "correct": "square of amplitude", "cat": "Wave Optics", "diff": "Medium", "test_idx": 4},
+        {"text": "The resolving power of a microscope is inversely proportional to", "type": "mcq", "options": ["wavelength", "aperture", "refractive index", "magnification"], "correct": "wavelength", "cat": "Wave Optics", "diff": "Hard", "test_idx": 4},
+        {"text": "Unpolarized light can be converted into polarized light by", "type": "mcq", "options": ["reflection", "refraction", "scattering", "all of the above"], "correct": "all of the above", "cat": "Wave Optics", "diff": "Medium", "test_idx": 4},
+        {"text": "Malus's law describes the intensity of light transmitted through a", "type": "mcq", "options": ["prism", "lens", "polarizer", "grating"], "correct": "polarizer", "cat": "Wave Optics", "diff": "Hard", "test_idx": 4},
+        {"text": "The phenomenon of diffraction is more pronounced for", "type": "mcq", "options": ["short wavelengths", "long wavelengths", "high frequencies", "low frequencies"], "correct": "long wavelengths", "cat": "Wave Optics", "diff": "Medium", "test_idx": 4},
+
+        # Unit 8 : Dual Nature of Radiation and Matter
+        {"text": "The photoelectric effect demonstrates the", "type": "mcq", "options": ["wave nature of light", "particle nature of light", "both", "none"], "correct": "particle nature of light", "cat": "Dual Nature", "diff": "Easy", "test_idx": 4},
+        {"text": "The work function of a metal is the minimum energy required to", "type": "mcq", "options": ["heat the metal", "emit an electron", "ionize the atom", "create a photon"], "correct": "emit an electron", "cat": "Dual Nature", "diff": "Easy", "test_idx": 4},
+        {"text": "Einstein's photoelectric equation is", "type": "mcq", "options": ["E = hf", "K_max = hf - Φ", "λ = h/p", "E = mc²"], "correct": "K_max = hf - Φ", "cat": "Dual Nature", "diff": "Medium", "test_idx": 4},
+        {"text": "The de Broglie wavelength of a particle is given by", "type": "mcq", "options": ["λ = h/p", "λ = hf", "λ = c/f", "λ = E/c"], "correct": "λ = h/p", "cat": "Dual Nature", "diff": "Easy", "test_idx": 4},
+        {"text": "Matter waves are associated with", "type": "mcq", "options": ["photons", "electrons", "protons", "all moving particles"], "correct": "all moving particles", "cat": "Dual Nature", "diff": "Medium", "test_idx": 4},
+        {"text": "The Davisson-Germer experiment confirmed the", "type": "mcq", "options": ["wave nature of electrons", "particle nature of electrons", "wave nature of light", "particle nature of light"], "correct": "wave nature of electrons", "cat": "Dual Nature", "diff": "Hard", "test_idx": 4},
+        {"text": "The stopping potential in photoelectric effect depends on", "type": "mcq", "options": ["intensity of light", "frequency of light", "distance of source", "area of cathode"], "correct": "frequency of light", "cat": "Dual Nature", "diff": "Medium", "test_idx": 4},
+        {"text": "Photons are quanta of", "type": "mcq", "options": ["matter", "energy", "charge", "momentum"], "correct": "energy", "cat": "Dual Nature", "diff": "Easy", "test_idx": 4},
+        {"text": "The momentum of a photon is", "type": "mcq", "options": ["hf/c", "h/λ", "E/c", "all of the above"], "correct": "all of the above", "cat": "Dual Nature", "diff": "Hard", "test_idx": 4},
+        {"text": "The intensity of incident radiation affects the", "type": "mcq", "options": ["kinetic energy of emitted electrons", "stopping potential", "number of emitted electrons", "work function"], "correct": "number of emitted electrons", "cat": "Dual Nature", "diff": "Medium", "test_idx": 4},
+        {"text": "X-rays are produced when fast-moving electrons are suddenly stopped by a metal target.", "type": "mcq", "options": ["True", "False", "Sometimes", "Depends on target"], "correct": "True", "cat": "Dual Nature", "diff": "Easy", "test_idx": 4},
+        {"text": "The minimum wavelength of X-rays produced is inversely proportional to the", "type": "mcq", "options": ["accelerating voltage", "current", "target material", "filament temperature"], "correct": "accelerating voltage", "cat": "Dual Nature", "diff": "Hard", "test_idx": 4},
+        {"text": "Compton effect demonstrates the", "type": "mcq", "options": ["wave nature of light", "particle nature of light", "wave nature of matter", "particle nature of matter"], "correct": "particle nature of light", "cat": "Dual Nature", "diff": "Hard", "test_idx": 4},
+        {"text": "The energy of a photon is directly proportional to its", "type": "mcq", "options": ["wavelength", "frequency", "speed", "amplitude"], "correct": "frequency", "cat": "Dual Nature", "diff": "Easy", "test_idx": 4},
+        {"text": "Electron microscope works on the principle of", "type": "mcq", "options": ["wave nature of electrons", "particle nature of electrons", "ray optics", "wave optics"], "correct": "wave nature of electrons", "cat": "Dual Nature", "diff": "Medium", "test_idx": 4},
+
         # Physics Part 1 (Units 1-4)
         # Unit 1 : Electrostatics
         {"text": "Coulomb’s law is strictly valid only when the charges are", "type": "mcq", "options": ["uniformly distributed", "stationary and point charges", "moving charges", "macroscopic bodies"], "correct": "stationary and point charges", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
