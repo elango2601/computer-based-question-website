@@ -48,14 +48,26 @@ def seed_db():
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
     
+    # Rename old tests if they exist (Migration)
+    old_to_new = {
+        "Physics Part 1 (Units 1-4)": "Physics Phase 1 (Units 1-4)",
+        "Physics Phase 3 (Units 5-8)": "Physics Phase 2 (Units 5-8)"
+    }
+    for old, new in old_to_new.items():
+        t = Test.query.filter_by(title=old).first()
+        if t:
+            t.title = new
+            db.session.commit()
+            print(f"Renamed Test: {old} -> {new}")
+
     tests_data = [
         ("Maths Phase 1 (Units 1-4)", "Topics: Matrices, Complex Numbers, Theory of Eq, Inv. Trig", yesterday),
         ("Maths Phase 2 (Units 5-8)", "Topics: Two Dimensional Analytical Geometry – II, Applications of Vector Algebra, Applications of Differential Calculus, Differentials and Partial Derivatives", today),
         ("Maths Phase 3 (Units 9-12)", "Topics: Applications of Integration,Ordinary Differential Equations,Probability Distributions,Discrete Mathematics", today),
-        ("Physics Part 1 (Units 1-4)", "Topics: Electrostatics, Current Electricity, Magnetism, EMI & AC", today),
+        ("Physics Phase 1 (Units 1-4)", "Topics: Electrostatics, Current Electricity, Magnetism, EMI & AC", today),
         ("Physics Phase 2 (Units 5-8)", "Topics: EM Waves, Ray Optics, Wave Optics, Dual Nature", tomorrow)
     ]
-
+    
     test_ids = []
     for title, desc, dt in tests_data:
         t = Test.query.filter_by(title=title).first()
