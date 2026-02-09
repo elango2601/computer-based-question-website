@@ -53,7 +53,7 @@ def seed_db():
         ("Maths Phase 2 (Units 5-8)", "Topics: Two Dimensional Analytical Geometry – II, Applications of Vector Algebra, Applications of Differential Calculus, Differentials and Partial Derivatives", today),
         ("Maths Phase 3 (Units 9-12)", "Topics: Applications of Integration,Ordinary Differential Equations,Probability Distributions,Discrete Mathematics", today),
         ("Physics Part 1 (Units 1-4)", "Topics: Electrostatics, Current Electricity, Magnetism, EMI & AC", today),
-        ("Physics Phase 3 (Units 5-8)", "Topics: EM Waves, Ray Optics, Wave Optics, Dual Nature", tomorrow)
+        ("Physics Phase 2 (Units 5-8)", "Topics: EM Waves, Ray Optics, Wave Optics, Dual Nature", tomorrow)
     ]
 
     test_ids = []
