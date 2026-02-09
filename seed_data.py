@@ -10,9 +10,9 @@ def seed_db():
     db.create_all()
 
     # ADMIN
-    if not User.query.filter_by(username='admin').first():
-        hash_pw = generate_password_hash('admin123')
-        admin = User(username='admin', password=hash_pw, role='admin')
+    if not User.query.filter_by(username='elangoadmin').first():
+        hash_pw = generate_password_hash('elangoadmin123')
+        admin = User(username='elangoadmin', password=hash_pw, role='admin')
         db.session.add(admin)
         print("Admin user created.")
 
@@ -51,7 +51,8 @@ def seed_db():
     tests_data = [
         ("Maths Phase 1 (Units 1-4)", "Topics: Matrices, Complex Numbers, Theory of Eq, Inv. Trig", yesterday),
         ("Maths Phase 2 (Units 5-8)", "Topics: Two Dimensional Analytical Geometry – II, Applications of Vector Algebra, Applications of Differential Calculus, Differentials and Partial Derivatives", today),
-        ("Maths Phase 3 (Units 9-12)", "Topics: Integration, Diff. Equations, Probability, Discrete Math", today)
+        ("Maths Phase 3 (Units 9-12)", "Topics: Applications of Integration,Ordinary Differential Equations,Probability Distributions,Discrete Mathematics", today),
+        ("Physics Part 1 (Units 1-4)", "Topics: Electrostatics, Current Electricity, Magnetism, EMI & AC", today)
     ]
 
     test_ids = []
@@ -213,6 +214,75 @@ def seed_db():
         {"text": "Contrapositive of 'If p then q' is", "type": "mcq", "options": ["If q then p", "If ¬p then ¬q", "If ¬q then ¬p", "If p then ¬q"], "correct": "If ¬q then ¬p", "cat": "Discrete Math", "diff": "Hard", "test_idx": 2},
         {"text": "If P(A)=0.4, P(B)=0.5 and independent, then P(A ∩ B) is", "type": "mcq", "options": ["0.9", "0.2", "0.45", "0.1"], "correct": "0.2", "cat": "Probability", "diff": "Hard", "test_idx": 2},
         {"text": "p ↔ q is true when", "type": "mcq", "options": ["p is true and q is false", "p is false and q is true", "p and q have same truth value", "p and q have different truth values"], "correct": "p and q have same truth value", "cat": "Discrete Math", "diff": "Hard", "test_idx": 2},
+        
+        # Physics Part 1 (Units 1-4)
+        # Unit 1 : Electrostatics
+        {"text": "Coulomb’s law is strictly valid only when the charges are", "type": "mcq", "options": ["uniformly distributed", "stationary and point charges", "moving charges", "macroscopic bodies"], "correct": "stationary and point charges", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "The SI unit of electric flux is", "type": "mcq", "options": ["N C⁻¹", "N m² C⁻¹", "C m⁻²", "N m C⁻¹"], "correct": "N m² C⁻¹", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "The electric field inside a charged conductor is zero because", "type": "mcq", "options": ["charges are destroyed", "charges reside on surface", "permittivity is zero", "electric force is infinite"], "correct": "charges reside on surface", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "Gauss law is most useful when the charge distribution has", "type": "mcq", "options": ["random symmetry", "cylindrical, spherical or planar symmetry", "irregular shape", "moving charges"], "correct": "cylindrical, spherical or planar symmetry", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "Electrostatic force between two charges decreases in water because", "type": "mcq", "options": ["water absorbs charge", "dielectric constant is high", "distance increases", "charge leaks"], "correct": "dielectric constant is high", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "Unit vector in Coulomb’s law represents", "type": "mcq", "options": ["magnitude of force", "distance", "direction of force", "charge density"], "correct": "direction of force", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "Dimensional formula of electric field is", "type": "mcq", "options": ["[MLT⁻³A⁻¹]", "[MLT⁻²A⁻¹]", "[ML²T⁻³A⁻¹]", "[ML⁻¹T⁻²A⁻¹]"], "correct": "[MLT⁻³A⁻¹]", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "Electric potential is a", "type": "mcq", "options": ["scalar quantity", "vector quantity", "tensor quantity", "pseudo vector"], "correct": "scalar quantity", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "Equipotential surfaces are always", "type": "mcq", "options": ["parallel to electric field", "perpendicular to electric field", "inclined to electric field", "circular to field"], "correct": "perpendicular to electric field", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "Capacitance depends on", "type": "mcq", "options": ["charge", "potential difference", "geometry of conductor", "dielectric strength"], "correct": "geometry of conductor", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "SI unit of capacitance is", "type": "mcq", "options": ["Coulomb", "Volt", "Farad", "Tesla"], "correct": "Farad", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "Energy stored in a capacitor depends on", "type": "mcq", "options": ["Q only", "V only", "both Q and V", "dielectric only"], "correct": "both Q and V", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "Electric dipole moment is directed from", "type": "mcq", "options": ["–q to +q", "+q to –q", "centre outward", "perpendicular to axis"], "correct": "–q to +q", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "Van de Graaff generator works on the principle of", "type": "mcq", "options": ["electromagnetic induction", "electrostatic induction", "corona discharge", "mutual induction"], "correct": "electrostatic induction", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "Sharp points on conductors produce corona discharge due to", "type": "mcq", "options": ["low electric field", "high electric field", "uniform charge distribution", "zero potential"], "correct": "high electric field", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        
+        # Unit 2 : Current Electricity
+        {"text": "Drift velocity of electrons increases when", "type": "mcq", "options": ["temperature increases", "electric field increases", "resistance increases", "length increases"], "correct": "electric field increases", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "SI unit of resistivity is", "type": "mcq", "options": ["Ω", "Ω m", "Ω m⁻¹", "m Ω"], "correct": "Ω m", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "Ohm’s law is valid only when", "type": "mcq", "options": ["temperature is constant", "voltage is high", "resistance is zero", "current is maximum"], "correct": "temperature is constant", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "Wheatstone bridge is used to", "type": "mcq", "options": ["measure current", "measure voltage", "compare resistances", "store charge"], "correct": "compare resistances", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "Kirchhoff’s junction rule is based on", "type": "mcq", "options": ["energy conservation", "charge conservation", "momentum conservation", "power conservation"], "correct": "charge conservation", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "Temperature coefficient of resistance for metals is", "type": "mcq", "options": ["zero", "negative", "positive", "infinite"], "correct": "positive", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "EMF of a cell is independent of", "type": "mcq", "options": ["current", "external resistance", "internal resistance", "chemical reaction"], "correct": "external resistance", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "Terminal voltage is less than EMF when the cell", "type": "mcq", "options": ["is idle", "supplies current", "is disconnected", "is fully charged"], "correct": "supplies current", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "Power dissipated in a resistor is maximum when", "type": "mcq", "options": ["R = 0", "R = ∞", "R = internal resistance", "R is minimum"], "correct": "R = internal resistance", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "Drift velocity is of the order of", "type": "mcq", "options": ["speed of light", "sound velocity", "mm/s", "km/s"], "correct": "mm/s", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "Conductivity is reciprocal of", "type": "mcq", "options": ["resistance", "resistivity", "current", "voltage"], "correct": "resistivity", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "Superconductors have resistivity", "type": "mcq", "options": ["zero", "infinite", "constant", "negative"], "correct": "zero", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "Ammeter is connected in", "type": "mcq", "options": ["parallel", "series", "mixed", "diagonal"], "correct": "series", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "Voltmeter resistance should be", "type": "mcq", "options": ["low", "zero", "infinite", "negative"], "correct": "infinite", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "Kirchhoff’s loop rule follows from", "type": "mcq", "options": ["charge conservation", "energy conservation", "mass conservation", "momentum conservation"], "correct": "energy conservation", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        
+        # Unit 3 : Magnetism
+        {"text": "SI unit of magnetic field is", "type": "mcq", "options": ["Weber", "Tesla", "Henry", "Gauss"], "correct": "Tesla", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "Fleming’s left hand rule is used to find", "type": "mcq", "options": ["direction of current", "direction of force", "direction of field", "magnitude of force"], "correct": "direction of force", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "Magnetic field at centre of circular coil increases with", "type": "mcq", "options": ["radius", "current", "resistance", "temperature"], "correct": "current", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "Lorentz force acts on", "type": "mcq", "options": ["stationary charge", "moving charge", "neutral particle", "photon"], "correct": "moving charge", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "Force on a charge moving parallel to magnetic field is", "type": "mcq", "options": ["maximum", "zero", "minimum", "infinite"], "correct": "zero", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "Right hand thumb rule is used to find", "type": "mcq", "options": ["direction of current", "direction of force", "direction of magnetic field", "magnitude of field"], "correct": "direction of magnetic field", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "Magnetic field lines form", "type": "mcq", "options": ["open curves", "closed loops", "straight lines", "broken paths"], "correct": "closed loops", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "SI unit of magnetic flux is", "type": "mcq", "options": ["Tesla", "Weber", "Henry", "Ampere"], "correct": "Weber", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "Torque on a magnetic dipole is maximum when", "type": "mcq", "options": ["θ = 0°", "θ = 90°", "θ = 180°", "θ = 45°"], "correct": "θ = 90°", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "Magnetic moment of current loop depends on", "type": "mcq", "options": ["current only", "area only", "current and area", "resistance"], "correct": "current and area", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "Moving coil galvanometer works on", "type": "mcq", "options": ["electromagnetic induction", "torque on current loop", "Lorentz force", "Hall effect"], "correct": "torque on current loop", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "Earth’s magnetic field is due to", "type": "mcq", "options": ["permanent magnet", "electric currents in core", "iron deposits", "solar wind"], "correct": "electric currents in core", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "Cyclotron cannot accelerate", "type": "mcq", "options": ["electrons", "protons", "alpha particles", "deuterons"], "correct": "electrons", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "Magnetic permeability is maximum for", "type": "mcq", "options": ["diamagnetic", "paramagnetic", "ferromagnetic", "vacuum"], "correct": "ferromagnetic", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        {"text": "Magnetic susceptibility is negative for", "type": "mcq", "options": ["paramagnetic", "ferromagnetic", "diamagnetic", "superconductors"], "correct": "diamagnetic", "cat": "Magnetism", "diff": "Easy", "test_idx": 3},
+        
+        # Unit 4 : EMI & AC
+        {"text": "Faraday’s law relates induced EMF with", "type": "mcq", "options": ["current", "resistance", "magnetic flux", "electric field"], "correct": "magnetic flux", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "Lenz’s law obeys", "type": "mcq", "options": ["momentum conservation", "energy conservation", "charge conservation", "mass conservation"], "correct": "energy conservation", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "Self induction occurs when", "type": "mcq", "options": ["current in nearby coil changes", "current in same coil changes", "resistance changes", "voltage is zero"], "correct": "current in same coil changes", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "SI unit of inductance is", "type": "mcq", "options": ["Tesla", "Henry", "Weber", "Ohm"], "correct": "Henry", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "Eddy currents are produced due to", "type": "mcq", "options": ["changing magnetic flux", "constant current", "static field", "electric field"], "correct": "changing magnetic flux", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "Transformer works on", "type": "mcq", "options": ["mutual induction", "self induction", "electromagnetic force", "Hall effect"], "correct": "mutual induction", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "Step-up transformer increases", "type": "mcq", "options": ["current", "voltage", "power", "frequency"], "correct": "voltage", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "RMS value of AC current is", "type": "mcq", "options": ["peak value", "zero", "average value", "0.707 × peak value"], "correct": "0.707 × peak value", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "Power factor is maximum when", "type": "mcq", "options": ["circuit is inductive", "circuit is capacitive", "circuit is resistive", "frequency is zero"], "correct": "circuit is resistive", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "Choke coil is used to", "type": "mcq", "options": ["increase power loss", "reduce AC current", "store charge", "generate EMF"], "correct": "reduce AC current", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "AC frequency in India is", "type": "mcq", "options": ["60 Hz", "50 Hz", "25 Hz", "100 Hz"], "correct": "50 Hz", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "Impedance is AC equivalent of", "type": "mcq", "options": ["current", "resistance", "voltage", "power"], "correct": "resistance", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "Reactance of capacitor decreases when", "type": "mcq", "options": ["frequency decreases", "frequency increases", "voltage increases", "current increases"], "correct": "frequency increases", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "LC oscillations occur due to", "type": "mcq", "options": ["energy loss", "energy transfer between L and C", "resistance", "power dissipation"], "correct": "energy transfer between L and C", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        {"text": "Q-factor of resonance is a measure of", "type": "mcq", "options": ["power loss", "sharpness of resonance", "current", "voltage"], "correct": "sharpness of resonance", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
     ]
 
     print(f"Seeding {len(questions_list)} questions...")
