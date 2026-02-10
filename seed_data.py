@@ -62,10 +62,11 @@ def seed_db():
 
     tests_data = [
         ("Maths Phase 1 (Units 1-4)", "Topics: Matrices, Complex Numbers, Theory of Eq, Inv. Trig", yesterday),
-        ("Maths Phase 2 (Units 5-8)", "Topics: Two Dimensional Analytical Geometry – II, Applications of Vector Algebra, Applications of Differential Calculus, Differentials and Partial Derivatives", today),
+        ("Maths Phase 2 (Units 5-8)", "Topics: Two Dimensional Analytical Geometry – II, Applications of Vector Algebra, Applications of Differential Calculus, Differentials and Partial Derivatives", yesterday),
         ("Maths Phase 3 (Units 9-12)", "Topics: Applications of Integration,Ordinary Differential Equations,Probability Distributions,Discrete Mathematics", today),
         ("Physics Phase 1 (Units 1-4)", "Topics: Electrostatics, Current Electricity, Magnetism, EMI & AC", today),
-        ("Physics Phase 2 (Units 5-8)", "Topics: EM Waves, Ray Optics, Wave Optics, Dual Nature", tomorrow)
+        ("Physics Phase 2 (Units 5-8)", "Topics: EM Waves, Ray Optics, Wave Optics, Dual Nature", today),
+        ("Physics Phase 3 (Units 9-12)", "Topics: Atomic Physics, Electronics, Recent Developments, Communication", today)
     ]
     
     test_ids = []
@@ -296,9 +297,79 @@ def seed_db():
         {"text": "Compton effect demonstrates the", "type": "mcq", "options": ["wave nature of light", "particle nature of light", "wave nature of matter", "particle nature of matter"], "correct": "particle nature of light", "cat": "Dual Nature", "diff": "Hard", "test_idx": 4},
         {"text": "The energy of a photon is directly proportional to its", "type": "mcq", "options": ["wavelength", "frequency", "speed", "amplitude"], "correct": "frequency", "cat": "Dual Nature", "diff": "Easy", "test_idx": 4},
         {"text": "Electron microscope works on the principle of", "type": "mcq", "options": ["wave nature of electrons", "particle nature of electrons", "ray optics", "wave optics"], "correct": "wave nature of electrons", "cat": "Dual Nature", "diff": "Medium", "test_idx": 4},
-
-        # Physics Part 1 (Units 1-4)
-        # Unit 1 : Electrostatics
+        
+        # Physics Phase 3 (Units 9-12)
+        # Unit 9 : Atomic & Nuclear Physics
+        {"text": "Bohr model fails to explain spectra of", "type": "mcq", "options": ["hydrogen atom", "multi-electron atoms", "ions only", "neutrons"], "correct": "multi-electron atoms", "cat": "Atomic Physics", "diff": "Easy", "test_idx": 5},
+        {"text": "Angular momentum of electron in Bohr atom is", "type": "mcq", "options": ["continuous", "quantised", "zero", "infinite"], "correct": "quantised", "cat": "Atomic Physics", "diff": "Easy", "test_idx": 5},
+        {"text": "The radius of the nth orbit is proportional to", "type": "mcq", "options": ["n", "n²", "1/n", "1/n²"], "correct": "n²", "cat": "Atomic Physics", "diff": "Easy", "test_idx": 5},
+        {"text": "Binding energy of a nucleus is a measure of", "type": "mcq", "options": ["stability", "radioactivity", "mass defect", "charge"], "correct": "stability", "cat": "Atomic Physics", "diff": "Easy", "test_idx": 5},
+        {"text": "Mass defect arises due to conversion of", "type": "mcq", "options": ["mass to energy", "energy to charge", "momentum to energy", "force to work"], "correct": "mass to energy", "cat": "Atomic Physics", "diff": "Easy", "test_idx": 5},
+        {"text": "Nuclear density is", "type": "mcq", "options": ["different for different nuclei", "proportional to mass number", "nearly constant", "zero for light nuclei"], "correct": "nearly constant", "cat": "Atomic Physics", "diff": "Easy", "test_idx": 5},
+        {"text": "Isotopes have same", "type": "mcq", "options": ["mass number", "neutron number", "atomic number", "binding energy"], "correct": "atomic number", "cat": "Atomic Physics", "diff": "Easy", "test_idx": 5},
+        {"text": "Half-life of a radioactive substance depends on", "type": "mcq", "options": ["temperature", "pressure", "external field", "nature of nucleus"], "correct": "nature of nucleus", "cat": "Atomic Physics", "diff": "Easy", "test_idx": 5},
+        {"text": "Fusion occurs at very high temperature because", "type": "mcq", "options": ["nuclei are neutral", "Coulomb repulsion must be overcome", "electrons are removed", "binding energy is zero"], "correct": "Coulomb repulsion must be overcome", "cat": "Atomic Physics", "diff": "Easy", "test_idx": 5},
+        {"text": "The SI unit of activity is", "type": "mcq", "options": ["curie", "rad", "becquerel", "gray"], "correct": "becquerel", "cat": "Atomic Physics", "diff": "Easy", "test_idx": 5},
+        
+        # Unit 10 : Electronics & Communication
+        {"text": "Intrinsic semiconductors have", "type": "mcq", "options": ["no charge carriers", "equal electrons and holes", "only electrons", "only holes"], "correct": "equal electrons and holes", "cat": "Electronics", "diff": "Easy", "test_idx": 5},
+        {"text": "Doping increases conductivity by", "type": "mcq", "options": ["increasing band gap", "reducing charge carriers", "increasing free carriers", "reducing mobility"], "correct": "increasing free carriers", "cat": "Electronics", "diff": "Easy", "test_idx": 5},
+        {"text": "p-type semiconductor majority carriers are", "type": "mcq", "options": ["electrons", "holes", "ions", "photons"], "correct": "holes", "cat": "Electronics", "diff": "Easy", "test_idx": 5},
+        {"text": "Depletion region has", "type": "mcq", "options": ["free electrons only", "free holes only", "immobile ions", "neutral atoms"], "correct": "immobile ions", "cat": "Electronics", "diff": "Medium", "test_idx": 5},
+        {"text": "Zener diode is used for", "type": "mcq", "options": ["amplification", "rectification", "voltage regulation", "oscillation"], "correct": "voltage regulation", "cat": "Electronics", "diff": "Easy", "test_idx": 5},
+        {"text": "Rectifier converts", "type": "mcq", "options": ["DC to AC", "AC to DC", "AC to AC", "DC to DC"], "correct": "AC to DC", "cat": "Electronics", "diff": "Easy", "test_idx": 5},
+        {"text": "Transistor gain β is ratio of", "type": "mcq", "options": ["Ie / Ib", "Ic / Ib", "Ib / Ic", "Ie / Ic"], "correct": "Ic / Ib", "cat": "Electronics", "diff": "Easy", "test_idx": 5},
+        {"text": "CE configuration has maximum", "type": "mcq", "options": ["current gain", "voltage gain", "power gain", "frequency"], "correct": "power gain", "cat": "Electronics", "diff": "Medium", "test_idx": 5},
+        {"text": "Logic gate NOT is also called", "type": "mcq", "options": ["AND gate", "OR gate", "inverter", "buffer"], "correct": "inverter", "cat": "Electronics", "diff": "Easy", "test_idx": 5},
+        {"text": "Band gap of conductor is", "type": "mcq", "options": ["large", "small", "zero", "infinite"], "correct": "zero", "cat": "Electronics", "diff": "Easy", "test_idx": 5},
+        
+        # Unit 11 : Recent Developments in Physics
+        {"text": "Superconductivity is characterised by", "type": "mcq", "options": ["high resistance", "zero resistance", "infinite resistance", "negative resistance"], "correct": "zero resistance", "cat": "Recent Developments", "diff": "Easy", "test_idx": 5},
+        {"text": "Critical temperature is the temperature below which", "type": "mcq", "options": ["resistance increases", "superconductivity appears", "magnetic field increases", "lattice vibrates"], "correct": "superconductivity appears", "cat": "Recent Developments", "diff": "Medium", "test_idx": 5},
+        {"text": "Meissner effect shows that superconductor is", "type": "mcq", "options": ["paramagnetic", "ferromagnetic", "diamagnetic", "non-magnetic"], "correct": "diamagnetic", "cat": "Recent Developments", "diff": "Medium", "test_idx": 5},
+        {"text": "LASER stands for", "type": "mcq", "options": ["Light Amplification by Stimulated Emission of Radiation", "Light Absorption by Stimulated Emission", "Long Amplified Source of Energy", "Low Amplitude Stimulated Emission"], "correct": "Light Amplification by Stimulated Emission of Radiation", "cat": "Recent Developments", "diff": "Easy", "test_idx": 5},
+        {"text": "Laser light is", "type": "mcq", "options": ["incoherent", "polychromatic", "highly directional", "low intensity"], "correct": "highly directional", "cat": "Recent Developments", "diff": "Easy", "test_idx": 5},
+        {"text": "Optical fibre works due to", "type": "mcq", "options": ["reflection", "refraction", "scattering", "total internal reflection"], "correct": "total internal reflection", "cat": "Recent Developments", "diff": "Easy", "test_idx": 5},
+        {"text": "Nanotechnology deals with structures of size", "type": "mcq", "options": ["10⁻³ m", "10⁻⁶ m", "10⁻⁹ m", "10⁻¹² m"], "correct": "10⁻⁹ m", "cat": "Recent Developments", "diff": "Easy", "test_idx": 5},
+        {"text": "MRI works on the principle of", "type": "mcq", "options": ["X-ray diffraction", "nuclear magnetic resonance", "photoelectric effect", "radioactivity"], "correct": "nuclear magnetic resonance", "cat": "Recent Developments", "diff": "Medium", "test_idx": 5},
+        {"text": "Gravitational waves were predicted by", "type": "mcq", "options": ["Newton", "Maxwell", "Einstein", "Feynman"], "correct": "Einstein", "cat": "Recent Developments", "diff": "Easy", "test_idx": 5},
+        {"text": "Dark matter is detected through", "type": "mcq", "options": ["emission of light", "absorption of light", "gravitational effects", "nuclear reactions"], "correct": "gravitational effects", "cat": "Recent Developments", "diff": "Hard", "test_idx": 5},
+        
+        # Unit 12 : Communication Systems / Advanced Electronics
+        {"text": "Modulation is necessary to", "type": "mcq", "options": ["reduce noise only", "reduce antenna size", "increase frequency", "reduce power"], "correct": "reduce antenna size", "cat": "Communication", "diff": "Easy", "test_idx": 5},
+        {"text": "In AM, the carrier parameter varied is", "type": "mcq", "options": ["frequency", "phase", "amplitude", "velocity"], "correct": "amplitude", "cat": "Communication", "diff": "Easy", "test_idx": 5},
+        {"text": "Bandwidth of AM signal is", "type": "mcq", "options": ["fm", "2fm", "fc", "fc + fm"], "correct": "2fm", "cat": "Communication", "diff": "Medium", "test_idx": 5},
+        {"text": "Noise is minimum in", "type": "mcq", "options": ["AM", "FM", "PM", "PAM"], "correct": "FM", "cat": "Communication", "diff": "Easy", "test_idx": 5},
+        {"text": "Demodulation is", "type": "mcq", "options": ["encoding", "decoding", "amplification", "modulation"], "correct": "decoding", "cat": "Communication", "diff": "Easy", "test_idx": 5},
+        {"text": "Satellite communication uses", "type": "mcq", "options": ["ionosphere", "troposphere", "space repeaters", "optical fibres"], "correct": "space repeaters", "cat": "Communication", "diff": "Medium", "test_idx": 5},
+        {"text": "Digital signals are preferred because they", "type": "mcq", "options": ["are continuous", "have more noise", "are noise resistant", "need more bandwidth"], "correct": "are noise resistant", "cat": "Communication", "diff": "Easy", "test_idx": 5},
+        {"text": "Microwave communication uses", "type": "mcq", "options": ["ground wave", "sky wave", "space wave", "surface wave"], "correct": "space wave", "cat": "Communication", "diff": "Medium", "test_idx": 5},
+        {"text": "Antenna length is proportional to", "type": "mcq", "options": ["frequency", "wavelength", "speed of light", "amplitude"], "correct": "wavelength", "cat": "Communication", "diff": "Easy", "test_idx": 5},
+        {"text": "Optical fibre communication has low loss due to", "type": "mcq", "options": ["absorption", "scattering", "total internal reflection", "refraction"], "correct": "total internal reflection", "cat": "Communication", "diff": "Easy", "test_idx": 5},
+        
+        # Part B - Book Inside
+        {"text": "Stability of nucleus is maximum when", "type": "mcq", "options": ["binding energy per nucleon is minimum", "binding energy per nucleon is maximum", "mass defect is zero", "atomic number is high"], "correct": "binding energy per nucleon is maximum", "cat": "Atomic Physics", "diff": "Hard", "test_idx": 5},
+        {"text": "Ground state energy of hydrogen atom is negative because", "type": "mcq", "options": ["electron is free", "nucleus repels electron", "electron is bound", "photon is emitted"], "correct": "electron is bound", "cat": "Atomic Physics", "diff": "Medium", "test_idx": 5},
+        {"text": "Radioactive decay follows", "type": "mcq", "options": ["linear law", "inverse square law", "exponential law", "quadratic law"], "correct": "exponential law", "cat": "Atomic Physics", "diff": "Easy", "test_idx": 5},
+        {"text": "Controlled nuclear fission is used in", "type": "mcq", "options": ["atomic bomb", "hydrogen bomb", "nuclear reactor", "stars"], "correct": "nuclear reactor", "cat": "Atomic Physics", "diff": "Easy", "test_idx": 5},
+        {"text": "PN junction at equilibrium has", "type": "mcq", "options": ["zero electric field", "built-in potential", "maximum current", "zero depletion layer"], "correct": "built-in potential", "cat": "Electronics", "diff": "Hard", "test_idx": 5},
+        {"text": "Forward bias reduces", "type": "mcq", "options": ["current", "depletion width", "conductivity", "charge carriers"], "correct": "depletion width", "cat": "Electronics", "diff": "Medium", "test_idx": 5},
+        {"text": "Laser coherence means", "type": "mcq", "options": ["same amplitude", "same wavelength", "fixed phase relation", "low intensity"], "correct": "fixed phase relation", "cat": "Recent Developments", "diff": "Medium", "test_idx": 5},
+        {"text": "Superconductors expel magnetic field due to", "type": "mcq", "options": ["Lorentz force", "Meissner effect", "Hall effect", "Zeeman effect"], "correct": "Meissner effect", "cat": "Recent Developments", "diff": "Easy", "test_idx": 5},
+        {"text": "Noise cannot be eliminated completely because it is", "type": "mcq", "options": ["external only", "internal only", "inherent in system", "due to antenna"], "correct": "inherent in system", "cat": "Communication", "diff": "Medium", "test_idx": 5},
+        {"text": "FM broadcasting has better quality because", "type": "mcq", "options": ["higher power", "lower frequency", "less noise", "simple circuit"], "correct": "less noise", "cat": "Communication", "diff": "Easy", "test_idx": 5},
+        {"text": "Optical fibres are made of", "type": "mcq", "options": ["copper", "aluminium", "glass or plastic", "silicon"], "correct": "glass or plastic", "cat": "Communication", "diff": "Easy", "test_idx": 5},
+        {"text": "Critical magnetic field destroys", "type": "mcq", "options": ["conductivity", "magnetism", "superconductivity", "insulation"], "correct": "superconductivity", "cat": "Recent Developments", "diff": "Hard", "test_idx": 5},
+        {"text": "Logic gate NAND is called universal because it", "type": "mcq", "options": ["is simplest", "uses least power", "can form all gates", "works fastest"], "correct": "can form all gates", "cat": "Electronics", "diff": "Medium", "test_idx": 5},
+        {"text": "Digital communication uses", "type": "mcq", "options": ["continuous signals", "discrete signals", "sinusoidal waves", "triangular waves"], "correct": "discrete signals", "cat": "Communication", "diff": "Easy", "test_idx": 5},
+        {"text": "Population inversion is essential for", "type": "mcq", "options": ["LED", "transistor", "laser", "diode"], "correct": "laser", "cat": "Recent Developments", "diff": "Medium", "test_idx": 5},
+        {"text": "Energy released in fusion is due to", "type": "mcq", "options": ["fission", "mass defect", "radioactivity", "beta decay"], "correct": "mass defect", "cat": "Atomic Physics", "diff": "Medium", "test_idx": 5},
+        {"text": "Communication range increases with", "type": "mcq", "options": ["lower frequency", "higher wavelength", "higher power", "lower antenna"], "correct": "higher power", "cat": "Communication", "diff": "Medium", "test_idx": 5},
+        {"text": "Transistor action is due to", "type": "mcq", "options": ["drift only", "diffusion only", "drift and diffusion", "recombination"], "correct": "drift and diffusion", "cat": "Electronics", "diff": "Hard", "test_idx": 5},
+        {"text": "Band gap energy is highest for", "type": "mcq", "options": ["conductors", "semiconductors", "insulators", "superconductors"], "correct": "insulators", "cat": "Electronics", "diff": "Easy", "test_idx": 5},
+        {"text": "Recent physics developments show that physics is", "type": "mcq", "options": ["isolated science", "theoretical only", "interdisciplinary", "outdated"], "correct": "interdisciplinary", "cat": "Recent Developments", "diff": "Easy", "test_idx": 5},
+        
+        # Restoring missing Physics Phase 1 Questions (Q1-Q5)
         {"text": "Coulomb’s law is strictly valid only when the charges are", "type": "mcq", "options": ["uniformly distributed", "stationary and point charges", "moving charges", "macroscopic bodies"], "correct": "stationary and point charges", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
         {"text": "The SI unit of electric flux is", "type": "mcq", "options": ["N C⁻¹", "N m² C⁻¹", "C m⁻²", "N m C⁻¹"], "correct": "N m² C⁻¹", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
         {"text": "The electric field inside a charged conductor is zero because", "type": "mcq", "options": ["charges are destroyed", "charges reside on surface", "permittivity is zero", "electric force is infinite"], "correct": "charges reside on surface", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
@@ -326,6 +397,14 @@ def seed_db():
         {"text": "Terminal voltage is less than EMF when the cell", "type": "mcq", "options": ["is idle", "supplies current", "is disconnected", "is fully charged"], "correct": "supplies current", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
         {"text": "Power dissipated in a resistor is maximum when", "type": "mcq", "options": ["R = 0", "R = ∞", "R = internal resistance", "R is minimum"], "correct": "R = internal resistance", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
         {"text": "Drift velocity is of the order of", "type": "mcq", "options": ["speed of light", "sound velocity", "mm/s", "km/s"], "correct": "mm/s", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
+        {"text": "Recent physics developments show that physics is", "type": "mcq", "options": ["isolated science", "theoretical only", "interdisciplinary", "outdated"], "correct": "interdisciplinary", "cat": "Recent Developments", "diff": "Easy", "test_idx": 5},
+        
+        # Restoring missing Physics Phase 1 Questions (Q1-Q5)
+        {"text": "Coulomb’s law is strictly valid only when the charges are", "type": "mcq", "options": ["uniformly distributed", "stationary and point charges", "moving charges", "macroscopic bodies"], "correct": "stationary and point charges", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "The SI unit of electric flux is", "type": "mcq", "options": ["N C⁻¹", "N m² C⁻¹", "C m⁻²", "N m C⁻¹"], "correct": "N m² C⁻¹", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "The electric field inside a charged conductor is zero because", "type": "mcq", "options": ["charges are destroyed", "charges reside on surface", "permittivity is zero", "electric force is infinite"], "correct": "charges reside on surface", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "Gauss law is most useful when the charge distribution has", "type": "mcq", "options": ["random symmetry", "cylindrical, spherical or planar symmetry", "irregular shape", "moving charges"], "correct": "cylindrical, spherical or planar symmetry", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
+        {"text": "Electrostatic force between two charges decreases in water because", "type": "mcq", "options": ["water absorbs charge", "dielectric constant is high", "distance increases", "charge leaks"], "correct": "dielectric constant is high", "cat": "Electrostatics", "diff": "Easy", "test_idx": 3},
         {"text": "Conductivity is reciprocal of", "type": "mcq", "options": ["resistance", "resistivity", "current", "voltage"], "correct": "resistivity", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
         {"text": "Superconductors have resistivity", "type": "mcq", "options": ["zero", "infinite", "constant", "negative"], "correct": "zero", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
         {"text": "Ammeter is connected in", "type": "mcq", "options": ["parallel", "series", "mixed", "diagonal"], "correct": "series", "cat": "Current Electricity", "diff": "Easy", "test_idx": 3},
