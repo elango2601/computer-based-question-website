@@ -66,7 +66,10 @@ def seed_db():
         ("Maths Phase 3 (Units 9-12)", "Topics: Applications of Integration,Ordinary Differential Equations,Probability Distributions,Discrete Mathematics", today),
         ("Physics Phase 1 (Units 1-4)", "Topics: Electrostatics, Current Electricity, Magnetism, EMI & AC", today),
         ("Physics Phase 2 (Units 5-8)", "Topics: EM Waves, Ray Optics, Wave Optics, Dual Nature", today),
-        ("Physics Phase 3 (Units 9-12)", "Topics: Atomic Physics, Electronics, Recent Developments, Communication", today)
+        ("Physics Phase 3 (Units 9-12)", "Topics: Atomic Physics, Electronics, Recent Developments, Communication", today),
+        ("Maths Revision 2 Phase 1 (Units 1-4)", "Topics: Matrices, Complex Numbers, Theory of Eq, Inv. Trig", tomorrow),
+        ("Maths Revision 2 Phase 2 (Units 5-8)", "Topics: Analytical Geometry, Vector Algebra, Calculus", tomorrow),
+        ("Maths Revision 2 Phase 3 (Units 9-12)", "Topics: Integration, ODE, Probability, Discrete Math", tomorrow)
     ]
     
     test_ids = []
@@ -444,6 +447,79 @@ def seed_db():
         {"text": "Reactance of capacitor decreases when", "type": "mcq", "options": ["frequency decreases", "frequency increases", "voltage increases", "current increases"], "correct": "frequency increases", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
         {"text": "LC oscillations occur due to", "type": "mcq", "options": ["energy loss", "energy transfer between L and C", "resistance", "power dissipation"], "correct": "energy transfer between L and C", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
         {"text": "Q-factor of resonance is a measure of", "type": "mcq", "options": ["power loss", "sharpness of resonance", "current", "voltage"], "correct": "sharpness of resonance", "cat": "EMI & AC", "diff": "Easy", "test_idx": 3},
+        
+        # Maths Revision 2 Phase 1 (Units 1-4)
+        # Unit 1 : Matrices
+        {"text": "If A is singular, then", "type": "mcq", "options": ["A^-1 exists", "adj A = O", "|A| = 0", "rank A = n"], "correct": "|A| = 0", "cat": "Matrices", "diff": "Easy", "test_idx": 6},
+        {"text": "If A is a non-singular matrix, then", "type": "mcq", "options": ["adj A = 0", "A^-1 = 1/|A|", "A^-1 = 1/|A| adj A", "A^T = A^-1"], "correct": "A^-1 = 1/|A| adj A", "cat": "Matrices", "diff": "Easy", "test_idx": 6},
+        {"text": "If AB=AC and A is non-singular, then", "type": "mcq", "options": ["B != C", "B = C", "A = 0", "C = 0"], "correct": "B = C", "cat": "Matrices", "diff": "Easy", "test_idx": 6},
+        {"text": "If |A|=1, then |A^-1| equals", "type": "mcq", "options": ["0", "-1", "1", "infinity"], "correct": "1", "cat": "Matrices", "diff": "Easy", "test_idx": 6},
+        {"text": "If A is orthogonal, then", "type": "mcq", "options": ["A^T = A", "A^-1 = A^T", "|A| = 0", "adj A = A"], "correct": "A^-1 = A^T", "cat": "Matrices", "diff": "Easy", "test_idx": 6},
+        
+        # Unit 2 : Complex Numbers
+        {"text": "If z + z_bar = 0, then z is", "type": "mcq", "options": ["real", "purely imaginary", "complex", "zero"], "correct": "purely imaginary", "cat": "Complex Numbers", "diff": "Easy", "test_idx": 6},
+        {"text": "If |z|=1, then z z_bar equals", "type": "mcq", "options": ["-1", "0", "1", "i"], "correct": "1", "cat": "Complex Numbers", "diff": "Easy", "test_idx": 6},
+        {"text": "The locus of z such that |z-3|=|z+3| is", "type": "mcq", "options": ["circle", "parabola", "imaginary axis", "straight line"], "correct": "imaginary axis", "cat": "Complex Numbers", "diff": "Easy", "test_idx": 6},
+        {"text": "Argument of a negative real number is", "type": "mcq", "options": ["0", "π", "π/2", "-π/2"], "correct": "π", "cat": "Complex Numbers", "diff": "Easy", "test_idx": 6},
+        {"text": "If z^n = 1, the roots lie on", "type": "mcq", "options": ["imaginary axis", "real axis", "unit circle", "parabola"], "correct": "unit circle", "cat": "Complex Numbers", "diff": "Easy", "test_idx": 6},
+        
+        # Unit 3 : Theory of Equations
+        {"text": "Sum of roots of ax^2+bx+c=0 equals", "type": "mcq", "options": ["c/a", "b/a", "-b/a", "-c/a"], "correct": "-b/a", "cat": "Theory of Equations", "diff": "Easy", "test_idx": 6},
+        {"text": "If one root is reciprocal of the other, then", "type": "mcq", "options": ["c = a", "b = 0", "a = 0", "c = 0"], "correct": "c = a", "cat": "Theory of Equations", "diff": "Easy", "test_idx": 6},
+        {"text": "If roots are equal, discriminant is", "type": "mcq", "options": ["positive", "negative", "zero", "infinity"], "correct": "zero", "cat": "Theory of Equations", "diff": "Easy", "test_idx": 6},
+        {"text": "Number of positive roots is given by", "type": "mcq", "options": ["Rolle’s rule", "Descartes’ rule", "Vieta’s rule", "Newton’s rule"], "correct": "Descartes’ rule", "cat": "Theory of Equations", "diff": "Easy", "test_idx": 6},
+        {"text": "If all coefficients are real, complex roots occur in", "type": "mcq", "options": ["pairs", "triples", "single", "none"], "correct": "pairs", "cat": "Theory of Equations", "diff": "Easy", "test_idx": 6},
+        
+        # Unit 4 : Inverse Trigonometric Functions
+        {"text": "Domain of sin^-1 x is", "type": "mcq", "options": ["R", "(-infinity, infinity)", "[-1, 1]", "(0, 1)"], "correct": "[-1, 1]", "cat": "Inverse Trig", "diff": "Easy", "test_idx": 6},
+        {"text": "Principal value of tan^-1 x lies in", "type": "mcq", "options": ["[0, π]", "(-π/2, π/2)", "(0, π/2)", "(-π, π)"], "correct": "(-π/2, π/2)", "cat": "Inverse Trig", "diff": "Easy", "test_idx": 6},
+        {"text": "sin^-1(sin 5π/6) equals", "type": "mcq", "options": ["5π/6", "π/6", "-π/6", "-5π/6"], "correct": "π/6", "cat": "Inverse Trig", "diff": "Medium", "test_idx": 6},
+        {"text": "cos^-1 x + sin^-1 x =", "type": "mcq", "options": ["π", "0", "π/2", "-π/2"], "correct": "π/2", "cat": "Inverse Trig", "diff": "Easy", "test_idx": 6},
+        {"text": "tan^-1 1 + tan^-1 2 + tan^-1 3 =", "type": "mcq", "options": ["π/2", "π", "0", "3π/2"], "correct": "π", "cat": "Inverse Trig", "diff": "Medium", "test_idx": 6},
+        
+        # Part B - Book Inside (20 Questions)
+        {"text": "Rank of identity matrix of order n is", "type": "mcq", "options": ["0", "1", "n", "n^2"], "correct": "n", "cat": "Matrices", "diff": "Easy", "test_idx": 6},
+        {"text": "A matrix is invertible if and only if it is", "type": "mcq", "options": ["square", "symmetric", "non-singular", "diagonal"], "correct": "non-singular", "cat": "Matrices", "diff": "Easy", "test_idx": 6},
+        {"text": "For any square matrix A, adj(adj A) equals", "type": "mcq", "options": ["A", "|A|A", "|A|^(n-2) A", "|A|^2 A"], "correct": "|A|^(n-2) A", "cat": "Matrices", "diff": "Hard", "test_idx": 6},
+        {"text": "If z = r e^(iθ), then r represents", "type": "mcq", "options": ["argument", "imaginary part", "modulus", "conjugate"], "correct": "modulus", "cat": "Complex Numbers", "diff": "Easy", "test_idx": 6},
+        {"text": "Euler’s formula connects", "type": "mcq", "options": ["algebra and geometry", "trigonometry and calculus", "exponential and trigonometric functions", "matrices and vectors"], "correct": "exponential and trigonometric functions", "cat": "Complex Numbers", "diff": "Easy", "test_idx": 6},
+        {"text": "The number of nth roots of unity is", "type": "mcq", "options": ["n-1", "n", "2n", "infinite"], "correct": "n", "cat": "Complex Numbers", "diff": "Easy", "test_idx": 6},
+        {"text": "Nature of roots depends on", "type": "mcq", "options": ["coefficient a", "constant term", "discriminant", "degree"], "correct": "discriminant", "cat": "Theory of Equations", "diff": "Easy", "test_idx": 6},
+        {"text": "If alpha, beta are roots, then polynomial with roots alpha^2, beta^2 is obtained by", "type": "mcq", "options": ["substitution", "squaring equation", "elimination", "division"], "correct": "elimination", "cat": "Theory of Equations", "diff": "Medium", "test_idx": 6},
+        {"text": "Principal value branch ensures inverse trig function is", "type": "mcq", "options": ["continuous", "one-one", "periodic", "bounded"], "correct": "one-one", "cat": "Inverse Trig", "diff": "Easy", "test_idx": 6},
+        {"text": "sin^-1 x is defined only when", "type": "mcq", "options": ["x in R", "|x| >= 1", "|x| <= 1", "x > 0"], "correct": "|x| <= 1", "cat": "Inverse Trig", "diff": "Easy", "test_idx": 6},
+        {"text": "If A is symmetric, then adj A is", "type": "mcq", "options": ["skew-symmetric", "diagonal", "symmetric", "orthogonal"], "correct": "symmetric", "cat": "Matrices", "diff": "Easy", "test_idx": 6},
+        {"text": "The locus of |z| = r represents", "type": "mcq", "options": ["straight line", "circle", "parabola", "ellipse"], "correct": "circle", "cat": "Complex Numbers", "diff": "Easy", "test_idx": 6},
+        {"text": "If roots are real and distinct, discriminant is", "type": "mcq", "options": ["zero", "negative", "positive", "imaginary"], "correct": "positive", "cat": "Theory of Equations", "diff": "Easy", "test_idx": 6},
+        {"text": "Domain of cos^-1 x is", "type": "mcq", "options": ["R", "(-infinity, infinity)", "[-1, 1]", "(0, π)"], "correct": "[-1, 1]", "cat": "Inverse Trig", "diff": "Easy", "test_idx": 6},
+        {"text": "Range of cos^-1 x is", "type": "mcq", "options": ["(-π/2, π/2)", "[0, π]", "(-π, π)", "R"], "correct": "[0, π]", "cat": "Inverse Trig", "diff": "Easy", "test_idx": 6},
+        {"text": "If alpha is a root, then -alpha is also a root when polynomial has", "type": "mcq", "options": ["even powers only", "odd powers only", "mixed powers", "constant term zero"], "correct": "even powers only", "cat": "Theory of Equations", "diff": "Easy", "test_idx": 6},
+        {"text": "Conjugate of a + ib is", "type": "mcq", "options": ["a + ib", "a - ib", "-a + ib", "-a - ib"], "correct": "a - ib", "cat": "Complex Numbers", "diff": "Easy", "test_idx": 6},
+        {"text": "Matrix used in rotation in geometry is", "type": "mcq", "options": ["diagonal", "orthogonal", "singular", "triangular"], "correct": "orthogonal", "cat": "Matrices", "diff": "Easy", "test_idx": 6},
+        {"text": "If A is singular, then", "type": "mcq", "options": ["adj A != 0", "A^-1 exists", "|A| = 0", "rank is full"], "correct": "|A| = 0", "cat": "Matrices", "diff": "Easy", "test_idx": 6},
+        {"text": "Principal value of sin^-1 x lies in", "type": "mcq", "options": ["(-π, π)", "(-π/2, π/2)", "[0, π]", "R"], "correct": "(-π/2, π/2)", "cat": "Inverse Trig", "diff": "Easy", "test_idx": 6},
+        
+        # Balance 20 Very Tough Questions
+        {"text": "If A is a square matrix such that A^2 = I, then A^-1 is", "type": "mcq", "options": ["A^2", "A", "-A", "I"], "correct": "A", "cat": "Matrices", "diff": "Hard", "test_idx": 6},
+        {"text": "If |A| = -2, then |2A| for a 3x3 matrix is", "type": "mcq", "options": ["-4", "-8", "-16", "-32"], "correct": "-32", "cat": "Matrices", "diff": "Hard", "test_idx": 6},
+        {"text": "If A is skew-symmetric of odd order, then |A| equals", "type": "mcq", "options": ["1", "-1", "0", "undefined"], "correct": "0", "cat": "Matrices", "diff": "Hard", "test_idx": 6},
+        {"text": "Rank of a zero matrix is", "type": "mcq", "options": ["1", "n", "undefined", "0"], "correct": "0", "cat": "Matrices", "diff": "Hard", "test_idx": 6},
+        {"text": "If AB = O and A != O, then", "type": "mcq", "options": ["B = O always", "B may be non-zero", "A is singular", "B is identity"], "correct": "B may be non-zero", "cat": "Matrices", "diff": "Hard", "test_idx": 6},
+        {"text": "If z = a + ib and |z| = 0, then", "type": "mcq", "options": ["a = 0", "b = 0", "a = b = 0", "z = i"], "correct": "a = b = 0", "cat": "Complex Numbers", "diff": "Hard", "test_idx": 6},
+        {"text": "The geometric representation of a purely imaginary number is a point on", "type": "mcq", "options": ["x-axis", "y-axis", "origin", "unit circle"], "correct": "y-axis", "cat": "Complex Numbers", "diff": "Hard", "test_idx": 6},
+        {"text": "If z z_bar = 25, then |z| equals", "type": "mcq", "options": ["5", "-5", "25", "+-5"], "correct": "5", "cat": "Complex Numbers", "diff": "Hard", "test_idx": 6},
+        {"text": "If z = cos theta + i sin theta, then |z| is", "type": "mcq", "options": ["cos theta", "sin theta", "theta", "1"], "correct": "1", "cat": "Complex Numbers", "diff": "Hard", "test_idx": 6},
+        {"text": "The locus of points satisfying |z - i| = |z + i| is", "type": "mcq", "options": ["x-axis", "y-axis", "circle", "parabola"], "correct": "x-axis", "cat": "Complex Numbers", "diff": "Hard", "test_idx": 6},
+        {"text": "If the roots of a quadratic equation are equal, then the graph of the equation", "type": "mcq", "options": ["cuts x-axis at two points", "does not touch x-axis", "touches x-axis at one point", "is parallel to x-axis"], "correct": "touches x-axis at one point", "cat": "Theory of Equations", "diff": "Hard", "test_idx": 6},
+        {"text": "If sum and product of roots are both zero, then roots are", "type": "mcq", "options": ["1, -1", "0, 0", "1, 0", "-1, 0"], "correct": "0, 0", "cat": "Theory of Equations", "diff": "Hard", "test_idx": 6},
+        {"text": "The maximum number of real roots of a polynomial of degree n is", "type": "mcq", "options": ["n-1", "n", "2n", "infinite"], "correct": "n", "cat": "Theory of Equations", "diff": "Hard", "test_idx": 6},
+        {"text": "If a polynomial has only even powers of x, then", "type": "mcq", "options": ["roots are equal", "roots are imaginary", "roots occur in pairs ±α", "roots are zero"], "correct": "roots occur in pairs ±α", "cat": "Theory of Equations", "diff": "Hard", "test_idx": 6},
+        {"text": "Descartes’ rule of signs gives information about", "type": "mcq", "options": ["exact roots", "imaginary roots", "positive and negative roots", "rational roots"], "correct": "positive and negative roots", "cat": "Theory of Equations", "diff": "Hard", "test_idx": 6},
+        {"text": "sin^-1(-x) equals", "type": "mcq", "options": ["sin^-1 x", "-sin^-1 x", "π - sin^-1 x", "π + sin^-1 x"], "correct": "-sin^-1 x", "cat": "Inverse Trig", "diff": "Hard", "test_idx": 6},
+        {"text": "cos^-1(-x) equals", "type": "mcq", "options": ["cos^-1 x", "π - cos^-1 x", "-cos^-1 x", "π + cos^-1 x"], "correct": "π - cos^-1 x", "cat": "Inverse Trig", "diff": "Hard", "test_idx": 6},
+        {"text": "tan^-1(-x) equals", "type": "mcq", "options": ["tan^-1 x", "-tan^-1 x", "π - tan^-1 x", "π + tan^-1 x"], "correct": "-tan^-1 x", "cat": "Inverse Trig", "diff": "Hard", "test_idx": 6},
+        {"text": "The range of sin^-1 x is chosen to make it", "type": "mcq", "options": ["periodic", "bounded", "continuous", "one-one"], "correct": "one-one", "cat": "Inverse Trig", "diff": "Hard", "test_idx": 6},
+        {"text": "tan^-1 1 + tan^-1 2 + tan^-1 3 equals", "type": "mcq", "options": ["π/2", "π", "3π/2", "0"], "correct": "π", "cat": "Inverse Trig", "diff": "Hard", "test_idx": 6},
     ]
 
     print(f"Seeding {len(questions_list)} questions...")
