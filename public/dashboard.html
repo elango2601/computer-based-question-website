@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - StudentQA</title>
+    <title>Dashboard - StudentQA</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -19,11 +22,20 @@
     </nav>
 
     <div class="container animate-fade-in">
-        <h2 class="mb-4">Available Exams</h2>
-        <div id="tests-grid"
-            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
-            <!-- Tests loaded dynamically -->
-            <div class="text-center p-8" style="grid-column: 1/-1;">Loading available exams...</div>
+        <div class="card mb-8">
+            <h2 class="text-xl font-bold mb-4">📈 Performance Analytics</h2>
+            <div style="height: 300px; width: 100%;">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Available Exams</h2>
+            <div id="tests-grid"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                <!-- Tests loaded dynamically -->
+                <div class="text-center p-8" style="grid-column: 1/-1;">Loading available exams...</div>
+            </div>
         </div>
 
         <h2 class="mt-12 mb-4">Exam History</h2>
@@ -71,11 +83,6 @@
                 data.forEach(test => {
                     const scheduledDate = test.scheduled_date; // YYYY-MM-DD
 
-                    // 1. Available Exams Grid
-                    // If not completed and date >= today (or past but still active/unattempted)
-                    // Actually, let's show all upcoming or active tests in grid.
-                    // If completed, maybe still show but with "View Results"
-
                     const card = document.createElement('div');
                     card.className = 'card test-card';
                     card.style.display = 'flex';
@@ -94,8 +101,15 @@
                     } else if (test.is_completed) {
                         statusBadge = '<span style="background:var(--success); color:white; padding:2px 8px; border-radius:4px; font-size:0.8rem">Completed</span>';
                         const cardPercent = test.total_questions > 0 ? Math.round((test.score / test.total_questions) * 100) : 0;
+
+                        let certBtn = '';
+                        if (cardPercent >= 50) { // Assuming 50% is the passing mark for a certificate
+                            certBtn = `<a href="/api/tests/${test.id}/certificate" target="_blank" class="btn btn-secondary" style="font-size:0.8rem; padding:5px 10px; margin-left:10px;">📜 Certificate</a>`;
+                        }
+
                         actionButton = `<a href="solution.html?id=${test.id}" class="btn btn-secondary" style="width:100%">View Solutions</a>
-                                         <div class="text-center mt-2 text-sm">Score: ${test.score}/${test.total_questions} (${cardPercent}%)</div>`;
+                                         <div class="text-center mt-2 text-sm">Score: ${test.score}/${test.total_questions} (${cardPercent}%)</div>
+                                         <div class="text-center mt-2">${certBtn}</div>`;
 
                         // Add to History
                         hasHistory = true;
@@ -114,6 +128,7 @@
                             <td style="padding: 1rem; text-align: center; color: ${color}; font-weight: 700;">${percent}%</td>
                             <td style="padding: 1rem; text-align: right;">
                                 <a href="solution.html?id=${test.id}" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">View Analysis &rarr;</a>
+                                ${certBtn ? `<a href="/api/tests/${test.id}/certificate" target="_blank" style="color: var(--secondary); text-decoration: none; font-size: 0.9rem; margin-left: 10px;">📜 Certificate</a>` : ''}
                             </td>
                         `;
                         historyBody.appendChild(row);
@@ -123,7 +138,6 @@
                         actionButton = `<a href="quiz.html?id=${test.id}" class="btn btn-primary" style="width:100%">Start Exam</a>`;
                     }
 
-                    // Always add to grid (or maybe only if not completed? User preference. Let's keep all for now so they can access solutions via grid too)
                     card.innerHTML = `
                         <div class="flex justify-between items-start mb-2">
                             <h3 style="margin:0">${test.title}</h3>
@@ -145,9 +159,51 @@
                     historyBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-muted">No completed exams found yet.</td></tr>';
                 }
             }
+            renderChart(); // Call renderChart after tests are loaded
+        }
+
+        async function loadAnalytics() {
+            // This function is now redundant as renderChart handles analytics loading
+            // Keeping it for now, but its content is moved to renderChart
         }
 
         loadTests();
+        loadAnalytics(); // This will effectively do nothing now, but keeping the call for consistency if other parts rely on it.
+
+        async function renderChart() {
+            const { status, data } = await apiCall('/user/analytics');
+            if (status !== 200 || !data || data.length === 0) {
+                document.getElementById('performanceChart').parentElement.innerHTML = '<p class="text-muted text-center">Complete an exam to see analytics.</p>';
+                return;
+            }
+
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.test_title),
+                    datasets: [{
+                        label: 'Score Percentage (%)',
+                        data: data.map(d => d.percentage),
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'white' } },
+                        x: { grid: { display: false }, ticks: { color: 'white' } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    }
+                }
+            });
+        }
     </script>
 </body>
 

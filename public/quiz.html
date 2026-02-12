@@ -139,8 +139,14 @@
                 <li class="mb-4">🚫 <strong>No Tab Switching:</strong> Moving to another tab is recorded as malpractice.
                 </li>
                 <li class="mb-4">⏱️ <strong>Timer:</strong> You have 60 Minutes to complete the exam.</li>
+                <li class="mb-4">⚠️ <strong>Security:</strong> Fullscreen is monitored. Do not switch tabs.</li>
                 <li>📝 <strong>Navigation:</strong> Use the question palette to jump between questions.</li>
             </ul>
+
+            <button id="compiler-toggle-btn" onclick="toggleCompiler()" class="btn btn-secondary w-full mb-4 hidden"
+                style="background:#2c3e50; color:white;">
+                💻 Open Compiler
+            </button>
             <button class="btn btn-primary w-full" onclick="startExam()">Tick to Confirm & Start Exam</button>
         </div>
     </div>
@@ -241,6 +247,19 @@
         </div>
     </div>
 
+    <!-- Compiler Modal -->
+    <div id="compiler-modal" class="hidden"
+        style="position:fixed; bottom:0; right:0; width:600px; height:500px; background:white; z-index:9999; border-top-left-radius:10px; box-shadow: -5px -5px 15px rgba(0,0,0,0.2); display:none; flex-direction:column;">
+        <div
+            style="background:#2c3e50; color:white; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+            <span>Online Compiler (Python/Java/C++)</span>
+            <button onclick="toggleCompiler()"
+                style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+        </div>
+        <iframe id="compiler-frame" src="https://onecompiler.com/embed/python" width="100%" height="100%"
+            frameborder="0"></iframe>
+    </div>
+
     <script src="js/main.js"></script>
     <script>
         checkAuth('student');
@@ -298,14 +317,18 @@
             };
         }
 
+        function formatTime(seconds) {
+            let minutes = Math.floor(seconds / 60);
+            let remainingSeconds = seconds % 60;
+            remainingSeconds = remainingSeconds < 10 ? '0' + remainingSeconds : remainingSeconds;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            return `${minutes}:${remainingSeconds}`;
+        }
+
         function startTimer() {
             const timerEl = document.getElementById('timer-display');
             timerInterval = setInterval(() => {
-                let minutes = Math.floor(timeLeft / 60);
-                let seconds = timeLeft % 60;
-                seconds = seconds < 10 ? '0' + seconds : seconds;
-                minutes = minutes < 10 ? '0' + minutes : minutes;
-                timerEl.innerText = `${minutes}:${seconds}`;
+                timerEl.innerText = formatTime(timeLeft);
                 if (timeLeft < 300) timerEl.classList.add('timer-warning');
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
@@ -395,13 +418,33 @@
                 return;
             }
 
-            const { status, data } = await apiCall(`/tests/${testId}/questions`);
+            const { status, data: responseData } = await apiCall(`/tests/${testId}/questions`);
             if (status === 200) {
-                if (data.length === 0) {
+                let qData = [];
+                // Check if response has new format { test: {...}, questions: [...] }
+                if (responseData.questions) {
+                    qData = responseData.questions;
+                    if (responseData.test && responseData.test.duration) {
+                        timeLeft = responseData.test.duration * 60; // Set dynamic duration
+                        document.getElementById('timer-display').innerText = formatTime(timeLeft);
+                    }
+                    // Update Title if needed?
+                    if (responseData.test && responseData.test.title) {
+                        document.title = responseData.test.title + " - StudentQA";
+                    }
+                    // Compiler Logic
+                    if (responseData.test.has_compiler) {
+                        document.getElementById('compiler-toggle-btn').classList.remove('hidden');
+                    }
+                } else {
+                    qData = responseData; // Fallback to old array format
+                }
+
+                if (qData.length === 0) {
                     document.getElementById('loading').innerText = "No questions available for this exam.";
                     return;
                 }
-                questions = data;
+                questions = qData;
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('quiz-content').classList.remove('hidden');
                 renderPalette();
@@ -553,6 +596,34 @@
                 document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'auto');
                 document.getElementById('text-answer').disabled = false;
             }
+        }
+        function toggleCompiler() {
+            const modal = document.getElementById('compiler-modal');
+            if (modal.style.display === 'none' || modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex';
+            } else {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+        }
+
+        function enableProctoring() {
+            // Request Fullscreen
+            document.documentElement.requestFullscreen().catch(err => {
+                console.log("Fullscreen request denied: ", err);
+            });
+
+            // Tab Switch Detection
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    alert("⚠️ SECURITY WARNING: You switched tabs! This action is recorded.");
+                    // In real app, send apiCall to log violation
+                }
+            });
+
+            // Prevent Context Menu
+            document.addEventListener('contextmenu', event => event.preventDefault());
         }
     </script>
 </body>

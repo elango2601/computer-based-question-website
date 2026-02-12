@@ -1,1 +1,1 @@
-web: python seed_data.py && gunicorn app:app
+web: gunicorn cbt_django.wsgi

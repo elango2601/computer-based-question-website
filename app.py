@@ -1,4 +1,5 @@
 import json
+import random
 import os
 from flask import Flask, request, jsonify, send_from_directory, session
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -151,9 +152,13 @@ def get_tests():
 @app.route('/api/tests/<int:test_id>/questions', methods=['GET'])
 @login_required
 def get_test_questions(test_id):
+    test = Test.query.get_or_404(test_id)
     questions = Question.query.filter_by(test_id=test_id).all()
     
-    processed = []
+    # Randomize questions
+    random.shuffle(questions)
+    
+    processed_questions = []
     for q in questions:
         q_dict = {
             "id": q.id,
@@ -167,9 +172,15 @@ def get_test_questions(test_id):
                 q_dict['options'] = json.loads(q.options)
             except:
                 q_dict['options'] = []
-        processed.append(q_dict)
+        processed_questions.append(q_dict)
         
-    return jsonify(processed)
+    return jsonify({
+        "test": {
+            "title": test.title,
+            "duration": test.duration_minutes
+        },
+        "questions": processed_questions
+    })
 
 @app.route('/api/tests/<int:test_id>/stats', methods=['GET'])
 @login_required
@@ -212,6 +223,43 @@ def get_test_stats(test_id):
         "score": score,
         "history": history
     })
+
+@app.route('/api/user/analytics', methods=['GET'])
+@login_required
+def get_user_analytics():
+    user_id = session['user_id']
+    
+    # Get all tests the user has attempted at least one question from
+    attempted_test_ids = db.session.query(Result.test_id).filter_by(user_id=user_id).distinct()
+    
+    analytics = []
+    for (test_id,) in attempted_test_ids:
+        test = Test.query.get(test_id)
+        if not test:
+            continue
+            
+        total_questions = Question.query.filter_by(test_id=test_id).count()
+        if total_questions == 0:
+            continue
+
+        score = Result.query.filter_by(user_id=user_id, test_id=test_id, is_correct=True).count()
+        percentage = round((score / total_questions) * 100, 1)
+        
+        analytics.append({
+            "test_id": test_id,
+            "test_title": test.title,
+            "score": score,
+            "total_questions": total_questions,
+            "percentage": percentage,
+            "date": test.scheduled_date.isoformat() if test.scheduled_date else "N/A"
+        })
+        
+    # Sort by percentage descending? Or Date?
+    # Let's sort by date descending (most recent first if we had attempt date, but test.scheduled_date is future/past)
+    # Maybe sort by test_id for stability
+    analytics.sort(key=lambda x: x['test_id'])
+    
+    return jsonify(analytics)
 
 @app.route('/api/submit', methods=['POST'])
 @login_required

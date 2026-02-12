@@ -36,6 +36,13 @@ def seed_db():
         sharu = User(username='Sharuhasan', password=hash_pw, role='student')
         db.session.add(sharu)
         print("Sharuhasan user created.")
+    
+    # Aakash
+    if not User.query.filter_by(username='Aakash').first():
+        hash_pw = generate_password_hash('Aakash29')
+        aakash = User(username='Aakash', password=hash_pw, role='student')
+        db.session.add(aakash)
+        print("Aakash user created.")
 
     # RESET DATA - DISABLED to prevent data loss on restart
     # db.session.query(Result).delete()
