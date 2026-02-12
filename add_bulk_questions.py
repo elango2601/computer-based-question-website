@@ -433,8 +433,14 @@ Answer: B
 
 def parse_and_add():
     # Remove existing
-    test = Test.objects.get(pk=TEST_ID)
-    print(f"Adding questions to: {test.title}")
+    # Remove existing
+    try:
+        test = Test.objects.get(title="Maths Revision 2 Phase 1")
+    except Test.DoesNotExist:
+        print("Test 'Maths Revision 2 Phase 1' not found. Please run seed_full.py first.")
+        return
+
+    print(f"Adding questions to: {test.title} (ID: {test.id})")
     
     # Split by double newline usually separates questions
     # But user input has varied spacing.
