@@ -37,7 +37,71 @@
         </div>
     </div>
 
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="hidden"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; display:none; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
+        <div
+            style="background:#1e293b; padding:25px; border-radius:16px; width:90%; max-width:400px; text-align:center; border:1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="font-size:3rem; margin-bottom:10px;">⚠️</div>
+            <h3 class="mb-2" style="color:white; font-size:1.5rem;">Confirm Action</h3>
+            <p class="mb-6" style="color:#94a3b8; font-size:1rem;" id="confirm-msg">Are you sure?</p>
+            <div style="display:flex; justify-content:center; gap:15px;">
+                <button onclick="closeConfirmModal()" class="btn"
+                    style="background:transparent; border:1px solid #334155; color:#cbd5e1; padding: 8px 16px;">Cancel</button>
+                <button id="confirm-yes-btn" class="btn"
+                    style="background:#ef4444; color:white; border:none; padding: 8px 16px; font-weight:600;">Yes,
+                    Delete</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container animate-fade-in">
+        <!-- Test Management Section -->
+        <div class="flex justify-between items-center mb-8">
+            <h2>Test Management</h2>
+            <button onclick="toggleTestForm()" class="btn btn-primary">Create New Test</button>
+        </div>
+
+        <!-- Add Test Form -->
+        <div id="test-form-card" class="card mb-8 hidden">
+            <h3 class="mb-4" id="test-form-title">Create Test</h3>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="input-group">
+                    <label>Title <span style="color:red">*</span></label>
+                    <input type="text" id="new-test-title" placeholder="e.g. Science Final Exam">
+                </div>
+                <div class="input-group">
+                    <label>Date <span style="color:red">*</span></label>
+                    <input type="date" id="new-test-date">
+                </div>
+                <div class="input-group">
+                    <label>Duration (Minutes)</label>
+                    <input type="number" id="new-test-duration" value="60">
+                </div>
+                <div class="input-group">
+                    <label>Online Compiler?</label>
+                    <select id="new-test-compiler">
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
+                    </select>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Description</label>
+                <textarea id="new-test-desc" rows="2" placeholder="Brief description..."></textarea>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="toggleTestForm()" class="btn btn-secondary w-full">Cancel</button>
+                <button onclick="saveTest()" id="test-submit-btn" class="btn"
+                    style="background:var(--success); width:100%;">Create Test</button>
+            </div>
+        </div>
+
+        <!-- Tests List -->
+        <div id="tests-admin-list" class="card mb-12">
+            Loading tests...
+        </div>
+
         <div class="flex justify-between items-center mb-8">
             <h2>Question Management</h2>
             <button onclick="toggleQuestionForm()" class="btn btn-primary">Add New Question</button>
@@ -46,6 +110,13 @@
         <!-- Add Question Form -->
         <div id="question-form-card" class="card mb-8 hidden">
             <h3 class="mb-4">Add Question</h3>
+            <div class="input-group">
+                <label>Select Test/Phase <span style="color:red">*</span></label>
+                <select id="new-q-test">
+                    <option value="">Loading...</option>
+                </select>
+            </div>
+
             <div class="input-group">
                 <label>Question Text</label>
                 <textarea id="new-q-text" rows="2"></textarea>
@@ -292,13 +363,180 @@
 
         loadData();
         loadQuestions();
+        loadTestsForForm();
+        loadTestsList();
 
         function toggleQuestionForm() {
             document.getElementById('question-form-card').classList.toggle('hidden');
         }
 
+        let allTests = [];
+        let editingTestId = null;
+
+        function toggleTestForm(reset = true) {
+            const card = document.getElementById('test-form-card');
+            if (reset && card.classList.contains('hidden')) {
+                // Determine if we are opening fresh
+                resetForm();
+            }
+            card.classList.toggle('hidden');
+        }
+
+        function resetForm() {
+            editingTestId = null;
+            document.getElementById('test-form-title').innerText = 'Create Test';
+            document.getElementById('test-submit-btn').innerText = 'Create Test';
+            document.getElementById('new-test-title').value = '';
+            document.getElementById('new-test-date').value = '';
+            document.getElementById('new-test-duration').value = '60';
+            document.getElementById('new-test-desc').value = '';
+            document.getElementById('new-test-compiler').value = 'false';
+        }
+
+        function editTest(id) {
+            const t = allTests.find(x => x.id === id);
+            if (!t) return;
+
+            editingTestId = id;
+            document.getElementById('test-form-title').innerText = 'Edit Test';
+            document.getElementById('test-submit-btn').innerText = 'Update Test';
+
+            document.getElementById('new-test-title').value = t.title;
+            document.getElementById('new-test-date').value = t.scheduled_date; // Ensure YYYY-MM-DD format
+            document.getElementById('new-test-duration').value = t.duration_minutes;
+            document.getElementById('new-test-desc').value = t.description || '';
+            // Checking if has_compiler exists or default
+            // t.has_compiler might not be in get_tests response?
+            // User can define logic for compiler option if needed
+
+            document.getElementById('test-form-card').classList.remove('hidden');
+            window.scrollTo({ top: 100, behavior: 'smooth' });
+        }
+
+        async function loadTestsList() {
+            // Re-use /api/tests public endpoint for list
+            const { status, data } = await apiCall('/tests');
+            const list = document.getElementById('tests-admin-list');
+            list.innerHTML = '';
+
+            if (status === 200 && data.length > 0) {
+                allTests = data; // Store for editing
+
+                // Table header
+                const header = document.createElement('div');
+                header.className = 'flex justify-between p-2 text-muted text-sm';
+                header.innerHTML = '<span>Title & Status</span><span>Actions</span>';
+                list.appendChild(header);
+
+                data.forEach(t => {
+                    const isActive = t.is_active !== false;
+                    const statusColor = isActive ? 'var(--success)' : 'var(--error)';
+                    const statusText = isActive ? 'Active' : 'Expired';
+                    const toggleLabel = isActive ? 'Expire' : 'Activate';
+                    const toggleClass = isActive ? 'btn-secondary' : 'btn-success';
+
+                    const item = document.createElement('div');
+                    item.className = 'flex justify-between items-center p-3 mb-2';
+                    item.style.background = 'rgba(255,255,255,0.05)';
+                    item.style.borderRadius = '8px';
+                    item.innerHTML = `
+                        <div>
+                            <div style="font-weight:600">
+                                ${t.title} 
+                                <span style="font-size:0.7rem; background:${statusColor}; color:#000; padding:2px 6px; border-radius:4px; margin-left:5px;">${statusText}</span>
+                            </div>
+                            <div class="text-xs text-muted">${t.scheduled_date} | ${t.duration_minutes}m | ${t.total_questions} Questions</div>
+                        </div>
+                        <div class="flex gap-2">
+                             <button onclick="editTest(${t.id})" style="font-size:0.8rem; padding: 4px 10px; border-radius:4px; cursor:pointer;" class="btn-primary">Edit</button>
+                             <button onclick="toggleTestStatus(${t.id})" style="font-size:0.8rem; padding: 4px 10px; border-radius:4px; cursor:pointer;" class="${toggleClass}">${toggleLabel}</button>
+                             <button onclick="deleteTest(${t.id})" style="color:var(--error); border:1px solid var(--error); padding: 4px 12px; border-radius:4px; cursor:pointer; background:transparent;">Delete</button>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+            } else {
+                list.innerHTML = '<div class="text-muted text-center">No tests found. Create one!</div>';
+            }
+        }
+
+        async function saveTest() {
+            const title = document.getElementById('new-test-title').value;
+            const date = document.getElementById('new-test-date').value;
+            const duration = document.getElementById('new-test-duration').value;
+            const compiler = document.getElementById('new-test-compiler').value === 'true';
+            const desc = document.getElementById('new-test-desc').value;
+
+            if (!title || !date) return showToast('Title and Date are required', 'error');
+
+            let res;
+            if (editingTestId) {
+                // Update
+                res = await apiCall(`/admin/tests/${editingTestId}/update`, 'PUT', {
+                    title, scheduled_date: date, duration_minutes: duration, has_compiler: compiler, description: desc
+                });
+            } else {
+                // Create
+                res = await apiCall('/admin/tests', 'POST', {
+                    title, scheduled_date: date, duration_minutes: duration, has_compiler: compiler, description: desc
+                });
+            }
+
+            if (res.status === 200) {
+                showToast(editingTestId ? 'Test updated' : 'Test created', 'success');
+                if (!editingTestId) toggleTestForm(); // Close if create, keep open if edit? Or close both.
+                if (editingTestId) document.getElementById('test-form-card').classList.add('hidden');
+
+                resetForm();
+                loadTestsList();
+                loadTestsForForm();
+            } else {
+                showToast(res.data.error || 'Failed to save test', 'error');
+            }
+        }
+
+        async function toggleTestStatus(id) {
+            const res = await apiCall(`/admin/tests/${id}/toggle`, 'POST');
+            if (res.status === 200) {
+                showToast(res.data.message, 'info');
+                loadTestsList();
+            } else {
+                showToast('Failed to change status', 'error');
+            }
+        }
+
+        async function deleteTest(id) {
+            showConfirm('Are you sure? This deletes the test AND all its questions/results.', async () => {
+                const res = await apiCall(`/admin/tests/${id}`, 'DELETE');
+                if (res.status === 200) {
+                    showToast('Test deleted', 'info');
+                    loadTestsList();
+                    loadTestsForForm();
+                } else {
+                    showToast('Failed to delete test', 'error');
+                }
+            });
+        }
+
+        async function loadTestsForForm() {
+            const { status, data } = await apiCall('/tests');
+            const select = document.getElementById('new-q-test');
+            select.innerHTML = '<option value="">-- Select Test --</option>';
+
+            if (status === 200 && data.length > 0) {
+                data.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.innerText = t.title;
+                    select.appendChild(opt);
+                });
+            } else {
+                select.innerHTML = '<option value="">No tests found</option>';
+            }
+        }
+
         async function loadQuestions() {
-            const { status, data } = await apiCall('/questions');
+            const { status, data } = await apiCall('/admin/questions'); // Use new endpoint
             const list = document.getElementById('questions-list');
             list.innerHTML = '';
 
@@ -322,18 +560,20 @@
         }
 
         async function addQuestion() {
+            const testId = document.getElementById('new-q-test').value;
             const text = document.getElementById('new-q-text').value;
             const category = document.getElementById('new-q-cat').value;
             const difficulty = document.getElementById('new-q-diff').value;
             const optionsStr = document.getElementById('new-q-options').value;
             const correct = document.getElementById('new-q-correct').value;
 
+            if (!testId) return showToast('Please select a test', 'error');
             if (!text || !correct) return showToast('Please fill required fields', 'error');
 
             const options = optionsStr ? optionsStr.split(',').map(s => s.trim()) : [];
 
             const res = await apiCall('/admin/questions', 'POST', {
-                text, category, difficulty, options, correct_answer: correct
+                testId, text, category, difficulty, options, correct_answer: correct
             });
 
             if (res.status === 200) {
@@ -343,22 +583,45 @@
                 document.getElementById('new-q-text').value = '';
                 document.getElementById('new-q-options').value = '';
                 document.getElementById('new-q-correct').value = '';
+                // Reload questions (and maybe filter by test?)
                 loadQuestions();
             } else {
-                showToast('Failed to add question', 'error');
+                showToast(res.data.error || 'Failed to add question', 'error');
             }
         }
 
-        async function deleteQuestion(id) {
-            if (!confirm('Are you sure you want to delete this question? This will also remove any student results associated with it.')) return;
+        let pendingAction = null;
 
-            const res = await apiCall(`/admin/questions/${id}`, 'DELETE');
-            if (res.status === 200) {
-                showToast('Question deleted', 'info');
-                loadQuestions();
-            } else {
-                showToast('Failed to delete', 'error');
-            }
+        function showConfirm(msg, callback) {
+            document.getElementById('confirm-msg').innerText = msg;
+            pendingAction = callback;
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+            pendingAction = null;
+        }
+
+        document.getElementById('confirm-yes-btn').onclick = () => {
+            if (pendingAction) pendingAction();
+            closeConfirmModal();
+        };
+
+        async function deleteQuestion(id) {
+            showConfirm('Are you sure you want to delete this question? This will also remove any student results associated with it.', async () => {
+                const res = await apiCall(`/admin/questions/${id}`, 'DELETE');
+                if (res.status === 200) {
+                    showToast('Question deleted', 'info');
+                    loadQuestions();
+                } else {
+                    showToast('Failed to delete', 'error');
+                }
+            });
         }
 
         function resetResult(userId, testId) {

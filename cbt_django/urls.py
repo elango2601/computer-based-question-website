@@ -14,6 +14,14 @@ urlpatterns = [
     path('api/me', user_views.me_view),
     path('api/logout', user_views.logout_view),
     
+    path('api/admin/questions', exam_views.admin_questions),
+    path('api/admin/questions/<int:pk>', exam_views.admin_delete_question),
+    
+    path('api/admin/tests', exam_views.admin_tests),
+    path('api/admin/tests/<int:pk>', exam_views.admin_delete_test),
+    path('api/admin/tests/<int:pk>/toggle', exam_views.admin_toggle_test),
+    path('api/admin/tests/<int:pk>/update', exam_views.admin_update_test),
+    
     path('api/tests', exam_views.get_tests),
     path('api/tests/<int:test_id>/questions', exam_views.get_test_questions),
     path('api/submit', exam_views.submit_answer),

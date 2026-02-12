@@ -1,35 +1,153 @@
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from .models import Test, Question, Result
 from django.shortcuts import get_object_or_404
 import random
 from django.db.models import Count, Q
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.authentication import SessionAuthentication
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from django.http import HttpResponse
+from io import BytesIO
+import datetime
+
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return
+
+@csrf_exempt
+@api_view(['GET', 'POST'])
+@permission_classes([IsAdminUser])
+@authentication_classes([CsrfExemptSessionAuthentication])
+def admin_questions(request):
+    if request.method == 'GET':
+        questions = Question.objects.all().order_by('-id')[:50]
+        data = []
+        for q in questions:
+            data.append({
+                "id": q.id,
+                "text": q.text,
+                "category": q.category,
+                "difficulty": q.difficulty,
+                "correct_answer": q.correct_answer,
+                "test_id": q.test_id
+            })
+        return Response(data)
+    
+    elif request.method == 'POST':
+        data = request.data
+        test_id = data.get('testId') # Frontend likely sends testId
+        if not test_id:
+             if Test.objects.exists():
+                 test_id = Test.objects.first().id
+             else:
+                 return Response({'error': 'No tests available'}, status=400)
+        
+        q = Question.objects.create(
+            test_id=test_id,
+            text=data.get('text'),
+            category=data.get('category'),
+            difficulty=data.get('difficulty'),
+            options=data.get('options', []),
+            correct_answer=data.get('correct_answer'),
+            type='mcq'
+        )
+        return Response({'message': 'Created', 'id': q.id})
+
+@csrf_exempt
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+@authentication_classes([CsrfExemptSessionAuthentication])
+def admin_delete_question(request, pk):
+    q = get_object_or_404(Question, pk=pk)
+    q.delete()
+    return Response({'message': 'Deleted'})
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+@authentication_classes([CsrfExemptSessionAuthentication])
+def admin_tests(request):
+    data = request.data
+    try:
+        t = Test.objects.create(
+            title=data.get('title'),
+            description=data.get('description', ''),
+            scheduled_date=data.get('scheduled_date'),
+            duration_minutes=int(data.get('duration_minutes', 60)),
+            has_compiler=data.get('has_compiler', False),
+            is_active=True
+        )
+        return Response({'message': 'Test created', 'id': t.id})
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+
+@csrf_exempt
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+@authentication_classes([CsrfExemptSessionAuthentication])
+def admin_delete_test(request, pk):
+    t = get_object_or_404(Test, pk=pk)
+    t.delete()
+    return Response({'message': 'Test deleted'})
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+@authentication_classes([CsrfExemptSessionAuthentication])
+def admin_toggle_test(request, pk):
+    t = get_object_or_404(Test, pk=pk)
+    t.is_active = not t.is_active
+    t.save()
+    status = "Active" if t.is_active else "Expired"
+    return Response({'message': f'Test Marked as {status}', 'is_active': t.is_active})
+
+@csrf_exempt
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+@authentication_classes([CsrfExemptSessionAuthentication])
+def admin_update_test(request, pk):
+    t = get_object_or_404(Test, pk=pk)
+    data = request.data
+    
+    t.title = data.get('title', t.title)
+    t.scheduled_date = data.get('scheduled_date', t.scheduled_date)
+    t.duration_minutes = int(data.get('duration_minutes', t.duration_minutes))
+    t.has_compiler = data.get('has_compiler', t.has_compiler)
+    t.description = data.get('description', t.description)
+    t.save()
+    
+    return Response({'message': 'Test updated'})
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_tests(request):
-    tests = Test.objects.all().order_by('scheduled_date')
+    if request.user.is_staff:
+        tests = Test.objects.all().order_by('-id')
+    else:
+        tests = Test.objects.filter(is_active=True).order_by('scheduled_date')
+
     data = []
     for t in tests:
         total_q = t.questions.count()
         results = Result.objects.filter(user=request.user, test=t)
         attempted = results.count()
         score = results.filter(is_correct=True).count()
-        # Simplified completed logic: if attempted > 0.
-        # Ideally check if attempted == total_q or submitted flag.
         is_completed = attempted > 0
         
         data.append({
             "id": t.id,
             "title": t.title,
             "description": t.description,
-            "scheduled_date": t.scheduled_date, # DateField serializes to YYYY-MM-DD string automatically by DRF? No, standard Response uses DjangoJSONEncoder? No, DRF uses JSONRenderer.
-            # DRF JSONRenderer handles date objects -> ISO string.
+            "scheduled_date": t.scheduled_date,
             "duration_minutes": t.duration_minutes,
             "total_questions": total_q,
             "is_completed": is_completed,
-            "score": score
+            "score": score,
+            "is_active": t.is_active
         })
     return Response(data)
 
@@ -60,10 +178,8 @@ def get_test_questions(request, test_id):
         "questions": q_data
     })
 
-from django.views.decorators.csrf import csrf_exempt
-
-@csrf_exempt
 @api_view(['POST'])
+@authentication_classes([CsrfExemptSessionAuthentication])
 @permission_classes([IsAuthenticated])
 def submit_answer(request):
     data = request.data
@@ -96,7 +212,6 @@ def get_test_stats(request, test_id):
     questions = test.questions.all().order_by('id')
     history = []
     
-    # Efficiently fetch results
     results_map = {r.question_id: r for r in Result.objects.filter(user=user, test=test)}
     
     for q in questions:
@@ -126,7 +241,6 @@ def get_test_stats(request, test_id):
 @permission_classes([IsAuthenticated])
 def get_user_analytics(request):
     user = request.user
-    # Get distinct tests user attempted
     test_ids = Result.objects.filter(user=user).values_list('test_id', flat=True).distinct()
     
     analytics = []
@@ -148,19 +262,12 @@ def get_user_analytics(request):
             "percentage": percentage,
             "date": test.scheduled_date
         })
-        
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
-from django.http import HttpResponse
-from io import BytesIO
-import datetime
+    return Response(analytics)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def download_certificate(request, test_id):
     test = get_object_or_404(Test, pk=test_id)
-    # Check score
     score = Result.objects.filter(user=request.user, test=test, is_correct=True).count()
     total = test.questions.count() or 1
     percentage = (score / total) * 100
@@ -172,12 +279,10 @@ def download_certificate(request, test_id):
     p = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
     
-    # Border
     p.setStrokeColor(colors.blue)
     p.setLineWidth(5)
     p.rect(50, 50, width-100, height-100)
     
-    # Content
     p.setFont("Helvetica-Bold", 30)
     p.drawCentredString(width/2, height-150, "Certificate of Completion")
     
