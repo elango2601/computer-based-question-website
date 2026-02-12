@@ -118,6 +118,10 @@ USE_I18N = True
 
 USE_TZ = True
 
+CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+CSRF_USE_SESSIONS = False
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/

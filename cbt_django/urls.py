@@ -10,6 +10,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     # API Routes
+    path('api/register', user_views.register_view),
     path('api/login', user_views.login_view),
     path('api/me', user_views.me_view),
     path('api/logout', user_views.logout_view),
