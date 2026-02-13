@@ -442,6 +442,12 @@ def parse_and_add():
 
     print(f"Adding questions to: {test.title} (ID: {test.id})")
     
+    # CLEAR EXISTING to allow re-running script safely
+    count_existing = test.questions.count()
+    if count_existing > 0:
+        print(f"Clearing {count_existing} existing questions...")
+        test.questions.all().delete()
+    
     # Split by double newline usually separates questions
     # But user input has varied spacing.
     # But each question ends with "Answer: X".
