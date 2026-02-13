@@ -51,6 +51,7 @@ def apply_seed():
                 difficulty=q.get('diff', 'Medium'),
                 type=q['type']
             )
+            print(f"Added Q to {test.title}: {q['text'][:30]}...")
             count += 1
             
     print(f"Successfully added {count} questions from seed_data_list.")
