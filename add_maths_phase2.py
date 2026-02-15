@@ -486,7 +486,7 @@ def parse_and_add():
             continue
             
         # Detect Category Header
-        if "🔹 UNIT" in line or "🔥 PART B" in line:
+        if "UNIT" in line or "PART B" in line:
             if "UNIT 6" in line: current_cat = "Vector Algebra"
             elif "UNIT 7" in line: current_cat = "Differential Calculus"
             elif "UNIT 8" in line: current_cat = "Partial Derivatives"
